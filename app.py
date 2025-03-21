@@ -1,9 +1,11 @@
 import pygame
 from pygame.locals import *
 from OpenGL.GL import *
+from OpenGL.GLU import *
 from OpenGL.GLUT import *
+import renderer as renderer
 
-def main():
+def init_opengl_window():
     # Initialize pygame
     pygame.init()
     
@@ -12,26 +14,41 @@ def main():
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
     pygame.display.set_caption("OpenGL Window")
 
+    renderer.render_init()
+    
     # Set up OpenGL
     glClearColor(0.0, 0.0, 0.0, 1.0)  # Background color (black)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-    # Main loop
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                running = False
-            elif event.type == KEYDOWN:
-                if event.key == K_ESCAPE:  # Exit on pressing ESC
-                    running = False
+def user_input():
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            return False
+        elif event.type == KEYDOWN:
+            if event.key == K_ESCAPE:  # Exit on pressing ESC
+                return False
+    return True
 
-        # Clear the screen
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+# Clear the screen
+def clear():
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-        # Swap buffers to display the frame
-        pygame.display.flip()
-        pygame.time.wait(10)  # Small delay to limit frame rate
+def loop():
+    renderer.render_loop()
+
+def draw():    
+    # Swap buffers to display the frame
+    pygame.display.flip()
+    pygame.time.wait(10)  # Small delay to limit frame rate
+
+def main():
+    init_opengl_window()
+
+    while 1:
+        if not user_input(): break
+        clear()
+        loop()
+        draw()
 
     pygame.quit()
 

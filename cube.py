@@ -1,8 +1,5 @@
 from setuptools.command.rotate import rotate
-
-import tools
-from PythonCubeProject.tools import next_side, previous_side, opposite_side
-
+from tools import *
 
 class RubiksCube:
     # kostka przyjmuje tabele 6 tabel z czego każda reprezentuje ścianę kostki
@@ -19,10 +16,10 @@ class RubiksCube:
             "w": ""
         }
 
-        for t in tab:
-            s = tools.convert_table_to_side(t)
-            c = s[4]
-            self.sides[c] = s
+        codes = ['g','r','b','o','y','w']
+
+        for i,t in enumerate(tab):
+            self.sides[codes[i]] = t
 
     def rotate_side(self, side, clockwise=True):
         pass

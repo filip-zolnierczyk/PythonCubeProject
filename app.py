@@ -5,7 +5,7 @@ from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
 import cube
-import util
+from vector_util import *
 
 # Mapa kolorów dla ścianek kostki Rubika
 COLOR_MAP = {
@@ -53,9 +53,9 @@ def draw_face(face_key, face_colours, scale):
     square_side_len = (scale/cube_side_square_num)
 
     # oblicz wektory wzdluz scianki
-    v1, v2, v3, v4 = (util.mul_vector(vertices[x],scale) for x in faces[face_key])
-    vector_x = util.sub_vectors(v2,v1)
-    vector_y = util.sub_vectors(v4,v1)
+    v1, v2, v3, v4 = (mul_vector(vertices[x],scale) for x in faces[face_key])
+    vector_x = sub_vectors(v2,v1)
+    vector_y = sub_vectors(v4,v1)
 
     # narysuj wszystkie kwadraty na sciance (9 dla 3x3)
     for y in range(cube_side_square_num):
@@ -66,16 +66,16 @@ def draw_face(face_key, face_colours, scale):
             glColor3fv(colour)
             
             # oblicz offset obecnego kwadratu wzgledem scianki
-            offset_x = util.mul_vector(vector_x,x*square_side_len)
-            offset_y = util.mul_vector(vector_y,y*square_side_len)
-            offset = util.add_vectors(offset_x,offset_y)
+            offset_x = mul_vector(vector_x,x*square_side_len)
+            offset_y = mul_vector(vector_y,y*square_side_len)
+            offset = add_vectors(offset_x,offset_y)
 
             # oblicz wszystkie 4 katu obecnego kwadratu (po kolei przeciwko wskazowkom zegara)
             SQUARE_MULT = 0.95
-            pos1 = util.add_vectors(v1,offset) # lewo dol
-            pos2 = util.add_vectors(pos1, util.mul_vector(vector_x,square_side_len*SQUARE_MULT))
-            pos3 = util.add_vectors(pos2, util.mul_vector(vector_y,square_side_len*SQUARE_MULT))
-            pos4 = util.add_vectors(pos1, util.mul_vector(vector_y,square_side_len*SQUARE_MULT))
+            pos1 = add_vectors(v1,offset) # lewo dol
+            pos2 = add_vectors(pos1, mul_vector(vector_x,square_side_len*SQUARE_MULT))
+            pos3 = add_vectors(pos2, mul_vector(vector_y,square_side_len*SQUARE_MULT))
+            pos4 = add_vectors(pos1, mul_vector(vector_y,square_side_len*SQUARE_MULT))
 
             # wyslij pozycje do opengl
             glVertex3fv(pos1); glVertex3fv(pos2); glVertex3fv(pos3); glVertex3fv(pos4)
@@ -87,7 +87,7 @@ def draw_cube(scale):
     glColor3fv( (0.1,0.1,0.1) ) # black
     for key,f in faces.items():
         for v in f:
-            glVertex3fv(util.mul_vector(vertices[v],scale))
+            glVertex3fv(mul_vector(vertices[v],scale))
     glEnd()
 
 def draw_rubiks_cube(cube_state, scale):
@@ -105,7 +105,7 @@ def init():
     glClearColor(0.2, 0.2, 0.2, 1.0)  # Szare tło
     gluPerspective(45, (800 / 600), 0.1, 50.0)
     glTranslatef(0.0, 0.0, -5)
-    glRotatef(45, 45, 45, 0)
+    glRotatef(45, 1, 1, 0)
 
 
 def main():
@@ -120,7 +120,7 @@ def main():
         
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         glPushMatrix()
-        #glRotatef(rotation_angle, 1, 1, 0)
+        glRotatef(rotation_angle, 0, 1, 0)
         c = cube.RubiksCube(
             ["grgrgrgrgr", "rrrrgrrgrr", "bbrbbbbrbb", "oooowoowoo", "yybyybbyy", "wwwworbgww"]
         )
@@ -129,7 +129,7 @@ def main():
         
         pygame.display.flip()
         pygame.time.wait(10)
-        #rotation_angle += 1  # Obrót kostki
+        rotation_angle += 1  # Obrót kostki
     
     pygame.quit()
 

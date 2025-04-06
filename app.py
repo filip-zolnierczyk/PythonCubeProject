@@ -26,7 +26,7 @@ rubiks_algorythm = None
 running = True
 
 def init():
-    global clock, rubiks_data, rubiks_display, rotation_angle, rubiks_algorythm
+    global clock, rubiks_data, rubiks_display, rotation_angle, rubiks_algorythm, timer_start
 
     # init pygame window
     pygame.init()
@@ -44,32 +44,36 @@ def init():
     # app data
     clock = pygame.time.Clock()
     rotation_angle = 0
+    timer_start = 0
 
     # initialize cube data
-    rubiks_data = rubiks_data_file.RubiksCube(
-        ["grgrgrgrgr", "rrrrgrrgrr", "bbrbbbbrbb", "oooowoowoo", "yybyybbyy", "wwwworbgww"]
-    )
+    rubiks_data = rubiks_data_file.RubiksCube()
     rubiks_display = rubiks_display_file.RubiksCubeDisplay(3, V3_ZERO, 1, rubiks_data.sides)
     rubiks_algorythm = rubiks_algorythm_file.RubiksAlgorythm("CFOP", rubiks_data.sides) # przykladowo
 
 def loop(dt):
-    global rubiks_data, rubiks_display, rotation_angle, rubiks_algorythm
+    global rubiks_data, rubiks_display, rotation_angle, rubiks_algorythm, timer_start
 
     # rotacja kostki
-    rotation_angle += 60 * dt  # 60 stopni na sekundę
+    rotation_angle += 20 * dt  # 60 stopni na sekundę
     glRotatef(rotation_angle, 0, 1, 0)
 
-    # integracja z algorytmem ukladania kostki
-    if rubiks_display.animating:
+    # integracja z algorytmem ukladania kostki --> albo animacja albo czekanie iles sekund
+    if rubiks_display.is_animating():
         rubiks_display.update_animation(dt)
+    # if clock.get_time()/1000 < timer_start + 4:
+    #     pass
     else:
+         # Placeholder for future logic
         # update kolorow z poprzedniego ruchu
         rubiks_display.set_all_colours(rubiks_data.sides)
 
         # nowy ruch kostki
         move = rubiks_algorythm.get_next_move()
         rubiks_data.perform_move(move)
-        rubiks_display.animate_move(move, 4)
+        
+        rubiks_display.animate_move(move, 4) # jesli bez animacji to trzeba wykomentowac
+        timer_start = clock.get_time() / 1000  # czas w sekundach
 
     rubiks_display.draw()  # Rysowanie kostki Rubika
         

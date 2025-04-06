@@ -7,10 +7,11 @@ from util.orientation_util import *
 from util.rubiks_move_util import *
 from util.colour_util import *
 from util.cube_render_util import *
+from util.animation_util import *
 
 # class for rubiks mini-cubes
 class RubiksMiniCubeDisplay:
-    def __init__(self, origin=V3_ZERO, size=1):
+    def __init__(self, origin: V3 = V3_ZERO, size: float = 1):
         self.origin = origin
         self.size = size
         self.colours = ['x' for _ in range(6)]
@@ -20,7 +21,7 @@ class RubiksMiniCubeDisplay:
 
 # class for displaying any rubiks cube
 class RubiksCubeDisplay:
-    def __init__(self, square_num, pos=V3_ZERO, size = 1, colours_dict=None):
+    def __init__(self, square_num: int, pos: V3 = V3_ZERO, size: float = 1, colours_dict: dict = None):
         # init data
         self.pos = pos
         self.square_num = square_num
@@ -28,7 +29,7 @@ class RubiksCubeDisplay:
         self.origin = pos - V3_ONE * size * 0.5 # origin of the cube (corner)
         self.sides = [[] for _ in range(6)] # empty list for each side
         self.mini_cubes = [] # list of all mini-cubes
-        self.animating = False # animation flag
+        self.position_animation_objects = [] # list of animation objects for this mini-cube
 
         # initialize mini-cubes in sides[] array
         mini_cube_size = size / square_num
@@ -76,21 +77,21 @@ class RubiksCubeDisplay:
             draw_cube(mc.origin, 0.85*mc.size, mc.colours) # draw mini-cube at its origin
     
     def update_animation(self, dt):
-        pass
-        # if self.animating:
-        #     self.animation_time += dt
-        #     if self.animation_time >= self.animation_duration:
-        #         self.animating = False
-        #         self.animation_time = 0.0
-        #         return
-
-        #     # Interpolacja między pozycjami początkową i końcową
-        #     t = self.animation_time / self.animation_duration
-        #     for mini_cube in self.mini_cubes:
-        #         mini_cube.origin = add_vectors(self.start_position, mul_vector(sub_vectors(self.end_position, self.start_position), t))
+        for i,anim_obj in enumerate(self.position_animation_objects):
+            mini, anim = anim_obj
+            if not anim.is_animating(dt):
+                self.position_animation_objects.pop(i)
+            else:
+                mini.origin = anim.get_animation_value()
 
     def is_animating(self):
-        return self.animating
+        return len(self.position_animation_objects) > 0
     
     def animate_move(self, move: RubiksMove, duration: float):
-        self.animating = True
+        v1,v2 = face_local_vectors[move.value]
+        o = 0
+        dp = calc_rotation_matrix_for_rubiks_side(v1, v2, self.square_num, self.mini_cubes[o].size, 90 if move == "F" else -90)
+
+        for i,mini in enumerate(self.sides[o]):
+            self.position_animation_objects.append((mini,Animation(duration, mini.origin, mini.origin + dp[i//self.square_num][i%self.square_num])))
+            

@@ -45,5 +45,5 @@ def previous_side(x):
 
 
 def convert_table_to_side(t):
-    string = t[0] + t[3] + t[6] + t[1] + t[4] + t[7] + t[2] + t[5] + t[8]git add tolo
+    string = t[0] + t[3] + t[6] + t[1] + t[4] + t[7] + t[2] + t[5] + t[8]
     return string

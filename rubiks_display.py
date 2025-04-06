@@ -4,10 +4,12 @@ from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
-import cube
-from vector_util import *
+import rubiks_data
+from util.vector_util import *
 from pygame.math import Vector3 as V3
-from orientation_util import *
+from util.orientation_util import *
+from util.rubiks_move_util import *
+
 
 # Mapa kolorów dla ścianek kostki Rubika
 COLOR_MAP = {
@@ -56,6 +58,7 @@ class RubiksCubeDisplay:
         self.origin = pos - V3_ONE * size * 0.5 # origin of the cube (corner)
         self.sides = [[] for _ in range(6)] # empty list for each side
         self.mini_cubes = [] # list of all mini-cubes
+        self.animating = False # animation flag
 
         # initialize mini-cubes in sides[] array
         mini_cube_size = size / square_num
@@ -101,6 +104,26 @@ class RubiksCubeDisplay:
     def draw(self):
         for mc in self.mini_cubes:
             draw_cube(mc.origin, 0.85*mc.size, mc.colours) # draw mini-cube at its origin
+    
+    def update_animation(self, dt):
+        pass
+        # if self.animating:
+        #     self.animation_time += dt
+        #     if self.animation_time >= self.animation_duration:
+        #         self.animating = False
+        #         self.animation_time = 0.0
+        #         return
+
+        #     # Interpolacja między pozycjami początkową i końcową
+        #     t = self.animation_time / self.animation_duration
+        #     for mini_cube in self.mini_cubes:
+        #         mini_cube.origin = add_vectors(self.start_position, mul_vector(sub_vectors(self.end_position, self.start_position), t))
+
+    def is_animating(self):
+        return self.animating
+    
+    def animate_move(self, move: RubiksMove, duration: float):
+        self.animating = True
 
 def draw_cube(origin=V3_ZERO,size=1,colours=['x'for _ in range(6)]):
     glBegin(GL_QUADS)
@@ -110,3 +133,4 @@ def draw_cube(origin=V3_ZERO,size=1,colours=['x'for _ in range(6)]):
             vert_pos = vertices[v]
             glVertex3fv(add_vectors(tuple(origin),mul_vector(vert_pos,size)))
     glEnd()
+

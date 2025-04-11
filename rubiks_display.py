@@ -63,6 +63,24 @@ class RubiksCubeDisplay:
                     if z == 0: self.sides[Orientation.BACK.value].append(mini_cube)
                     if z == square_num-1: self.sides[Orientation.FRONT.value].append(mini_cube)
 
+        # uporzadkuj mini-kostki do poprawnej orientacji (1: xyz 2: xyz 3: xyz) po kolei rzedy od gory do dolu
+        """ 
+            green - front
+            red - right
+            blue - back
+            orange - left
+            yellow - top
+            white - bottom
+        """
+        self.sides = [
+            [self.sides[0][i + j*square_num] for i in reversed(range(square_num)) for j in range(square_num)], # kolumny --> rzedy
+            self.sides[1][::-1], # obrot 180 stopni
+            [self.sides[2][i + j*square_num] for i in reversed(range(square_num)) for j in reversed(range(square_num))], # kolumny --> rzedy
+            [self.sides[3][(square_num - 1 - j) + i*square_num] for i in reversed(range(square_num)) for j in reversed(range(square_num))],
+            [self.sides[4][i + j*square_num] for i in range(square_num) for j in range(square_num)], # kolumny --> rzedy
+            [self.sides[5][i + j*square_num] for i in reversed(range(square_num)) for j in range(square_num)], # kolumny --> rzedy
+        ]
+
         # set colours if given
         if colours_dict is not None:
             self.set_all_colours(colours_dict)

@@ -47,7 +47,7 @@ def calc_rotation_matrix_for_rubiks_side(local_up: V3, local_right: V3, square_n
             local_v_after_rotation = V3.rotate(local_v_from_middle, degrees, V3_Z) # rotacja wokol osi Z
             local_position_change = (local_v_after_rotation - local_v_from_middle) # zmiana pozycji
             global_position_change = local_position_change.x * local_right + local_position_change.y * local_up
-            dp[x][y] = global_position_change * rubiks_size
+            dp[y][x] = global_position_change * rubiks_size
     return dp
 
 

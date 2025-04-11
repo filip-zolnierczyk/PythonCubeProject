@@ -22,6 +22,15 @@ faces = [
     (0, 1, 5, 4)  # Dół
 ]
 
+mini_cube_ix_shift = [
+    [0,3,6,1,4,7,2,5,8], # column to row shift
+    [0,1,2,3,4,5,6,7,8],
+    [0,3,6,1,4,7,2,5,8], # column to row shift
+    [0,1,2,3,4,5,6,7,8],
+    [0,1,2,3,4,5,6,7,8],
+    [0,1,2,3,4,5,6,7,8],
+]
+
 def draw_cube(origin=V3_ZERO, size=1, colours=['x' for _ in range(6)], local_rotation=0, rotation_v=None):
     glPushMatrix()
 

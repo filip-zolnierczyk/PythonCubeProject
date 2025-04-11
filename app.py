@@ -56,6 +56,15 @@ def init():
     rubiks_display = rubiks_display_file.RubiksCubeDisplay(3, V3_ZERO, 1, rubiks_data.sides)
     rubiks_algorythm = rubiks_algorythm_file.RubiksAlgorythm("CFOP", rubiks_data.sides) # przykladowo
 
+test_col_dict = {
+    'g': "ggyrywybw",
+    'r': "ggyrywybw",
+    'b': "ggyrywybw",
+    'o': "ggyrywybw",
+    'y': "ggyrywybw",
+    'w': "ggyrywybw",
+}
+
 def loop(dt):
     global rubiks_data, rubiks_display, rotation_angle_x, rubiks_algorythm, timer_start, view_angle_anim_x
 
@@ -67,12 +76,13 @@ def loop(dt):
 
     # animacja ruchu scianki kostki
     if rubiks_display.is_animating():
-        rubiks_display.update_animation(dt)
+        pass
+        #rubiks_display.update_animation(dt)
 
     # pobranie nowego ruchu z algorytmu do wyswietlenia 
     else:
         # update kolorow z poprzedniego ruchu
-        rubiks_display.set_all_colours(rubiks_data.sides)
+        rubiks_display.set_all_colours(test_col_dict)
 
         # nowy ruch kostki
         move = rubiks_algorythm.get_next_move()

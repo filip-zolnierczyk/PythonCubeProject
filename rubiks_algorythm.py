@@ -16,6 +16,13 @@ class RubiksAlgorythm:
 
     def generate_move_sequence(self, initial_state):
         if self.algorythm == "CFOP":
-            self.move_sequence = [RubiksMove.F, RubiksMove.F_PRIME]
+            self.move_sequence = [
+                RubiksMove.F, RubiksMove.F_PRIME,
+                RubiksMove.R, RubiksMove.R_PRIME,
+                RubiksMove.B, RubiksMove.B_PRIME,
+                RubiksMove.L, RubiksMove.L_PRIME,
+                RubiksMove.U, RubiksMove.U_PRIME,
+                RubiksMove.D, RubiksMove.D_PRIME,
+            ]
         else: 
-            self.move_sequence = [RubiksMove.F_PRIME, RubiksMove.F]
+            self.move_sequence = [RubiksMove.F]

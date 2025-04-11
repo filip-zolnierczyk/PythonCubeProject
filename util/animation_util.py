@@ -1,12 +1,13 @@
 from util.vector_util import V3, V3_Z, V3_ZERO
 
 class Animation:
-    def __init__(self, duration, start_value, end_value, easing_function=None):
+    def __init__(self, duration, start_value, end_value, easing_function=None, reset_value=None):
         self.duration = duration
         self.time = 0
         self.start_value = start_value
         self.end_value = end_value
         self.easing_function = easing_function if easing_function else ease_in_out
+        self.reset_value = reset_value
 
     def is_animating(self,dt):
         self.time += dt
@@ -16,6 +17,9 @@ class Animation:
         t = self.time / self.duration
         eased_t = self.easing_function(t)
         return self.start_value + (self.end_value - self.start_value) * eased_t
+    
+    def get_reset_value(self):
+        return self.reset_value
 
 def linear_easing(t):
     return t
@@ -48,17 +52,21 @@ def calc_rotation_matrix_for_rubiks_side(local_up: V3, local_right: V3, square_n
 
 
 face_local_vectors = {
-    'F': (V3(0, 1, 0), V3(1, 0, 0)), # front
-    "F'": (V3(0, -1, 0), V3(-1, 0, 0)) # front
-    # 'R': (V3(1, 0, 0), V3(0, 0, -1)), # right
-    # 'B': (V3(0, 0, -1), V3(-1, 0, 0)), # back
-    # 'L': (V3(-1, 0, 0), V3(0, 0, 1)), # left
-    # 'U': (V3(0, 1, 0), V3(1, 0, 0)), # up
-    # 'D': (V3(0, -1, 0), V3(-1, 0, 0)), # down
-    # "F'": (V3(0, 0, -1), V3(-1, 0, 0)), # front inverted
-    # "R'": (V3(-1, 0, 0), V3(0, 0, 1)), # right inverted
-    # "B'": (V3(0, 0, 1), V3(1, 0, 0)), # back inverted
-    # "L'": (V3(1, 0, 0), V3(0, 0, -1)), # left inverted
-    # "U'": (V3(0, -1, 0), V3(-1, 0, 0)), # up inverted
-    # "D'": (V3(0, 1, 0), V3(1, 0, 0)), # down inverted
+    'F':  (V3(0, 1, 0), V3(1, 0, 0), V3(0, 0, -1)),  # up, right, forward
+    "F'": (V3(0, 1, 0), V3(1, 0, 0), V3(0, 0, -1)),
+
+    'B':  (V3(0, 1, 0), V3(1, 0, 0), V3(0, 0, -1)),
+    "B'": (V3(0, 1, 0), V3(1, 0, 0), V3(0, 0, -1)),
+
+    'R':  (V3(0, 1, 0), V3(0, 0, -1), V3(1, 0, 0)),
+    "R'": (V3(0, -1, 0), V3(0, 0, 1), V3(1, 0, 0)),
+
+    'L':  (V3(0, 1, 0), V3(0, 0, -1), V3(1, 0, 0)),
+    "L'": (V3(0, -1, 0), V3(0, 0, 1), V3(1, 0, 0)),
+
+    'U':  (V3(0, 0, 1), V3(1, 0, 0), V3(0, 1, 0)),
+    "U'": (V3(0, 0, 1), V3(1, 0, 0), V3(0, 1, 0)),
+
+    'D':  (V3(0, 0, 1), V3(1, 0, 0), V3(0, 1, 0)),
+    "D'": (V3(0, 0, 1), V3(1, 0, 0), V3(0, 1, 0)),
 }

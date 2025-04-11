@@ -1,5 +1,6 @@
 from enum import Enum
 from numpy.f2py.auxfuncs import throw_error
+import string
 
 class RubiksMove(Enum):
     # Główne ruchy 90° zgodnie z ruchem wskazówek zegara
@@ -55,7 +56,6 @@ def opposite_side(x):
     else:
         throw_error("Color does not exist")
 
-
 def next_side(x):
     if x == "b":
         return "r"
@@ -80,6 +80,23 @@ def previous_side(x):
     else:
         raise ValueError("Color does not exist")
 
+""" 
+    green - front
+    red - right
+    blue - back
+    orange - left
+    yellow - top
+    white - bottom
+"""
+
+def convert_move_to_face(move: string):
+    if move.value.find("F") != -1: return 'g'
+    if move.value.find("R") != -1: return 'r'
+    if move.value.find("B") != -1: return 'b'
+    if move.value.find("L") != -1: return 'o'
+    if move.value.find("U") != -1: return 'y'
+    if move.value.find("D") != -1: return 'w'
+    return 'x'
 
 def convert_table_to_side(t):
     string = t[0] + t[3] + t[6] + t[1] + t[4] + t[7] + t[2] + t[5] + t[8]

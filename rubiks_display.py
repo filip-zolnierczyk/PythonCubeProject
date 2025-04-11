@@ -123,7 +123,7 @@ class RubiksCubeDisplay:
         return len(self.position_animation_objects) > 0 or len(self.rotation_animation_objects) > 0
     
     def animate_move(self, move: RubiksMove, duration: float):
-        v1,v2,v3 = face_local_vectors[move.value]
+        v1,v2 = face_local_vectors[move.value]
         orientation_code = convert_move_to_face(move)
         orientation = code_to_orientation(orientation_code)
         clockwise = move.value.find("'") != -1
@@ -132,5 +132,5 @@ class RubiksCubeDisplay:
 
         for i,mini in enumerate(self.sides[orientation.value]):
             self.position_animation_objects.append( (mini,Animation(duration, mini.origin, mini.origin + dp[i//self.square_num][i%self.square_num], reset_value=mini.origin)) )
-            self.rotation_animation_objects.append( (mini,Animation(duration, 0, -rotation, reset_value=0)) )
-            mini.rotation_vector = v3
+            self.rotation_animation_objects.append( (mini,Animation(duration, 0, rotation, reset_value=0)) )
+            mini.rotation_vector = -v1.cross(v2)

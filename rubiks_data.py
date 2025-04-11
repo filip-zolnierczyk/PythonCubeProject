@@ -32,7 +32,6 @@ class RubiksCube:
     def perform_move(self, move: RubiksMove):
         # Mapowanie enum -> funkcja + kierunek
         move_str = move.value
-
         base_move = move_str[0]
         clockwise = True
         repeat = 1
@@ -50,7 +49,6 @@ class RubiksCube:
             'B': self.perform_b_move,
             'U': self.perform_u_move,
             'D': self.perform_d_move,
-            # TODO: 'X', 'Y', 'Z' można dodać osobno jako rotacje całej kostki
         }
 
         if base_move in move_function_map:

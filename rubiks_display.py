@@ -36,6 +36,7 @@ class RubiksCubeDisplay:
         self.mini_cubes = [] # list of all mini-cubes
         self.position_animation_objects = [] # list of animation objects for this mini-cube
         self.rotation_animation_objects = [] # list of animation objects for this mini-cube
+        self.is_coloured = False
 
         # initialize mini-cubes in sides[] array
         mini_cube_size = size / square_num
@@ -89,11 +90,16 @@ class RubiksCubeDisplay:
     def set_all_colours(self, colours_dict):
         for o in Orientation:
             self.set_side_colours(o, colours_dict[orientation_to_code(o)])
+        self.is_coloured = True
 
     # set the colours of a single side of the cube
     def set_side_colours(self, facing, colours):
         for i,mini in enumerate(self.sides[facing.value]):
             mini.colour_single_side(facing, colours[i])
+
+    # returns true if cube has been coloured and no move (animation) has been done
+    def is_currently_coloured(self):
+        return self.is_coloured
 
     # render
     def draw(self):
@@ -123,11 +129,14 @@ class RubiksCubeDisplay:
         return len(self.position_animation_objects) > 0 or len(self.rotation_animation_objects) > 0
     
     def animate_move(self, move: RubiksMove, duration: float):
+        self.is_coloured = False
         v1,v2 = face_local_vectors[move.value]
         orientation_code = convert_move_to_face(move)
         orientation = code_to_orientation(orientation_code)
         clockwise = move.value.find("'") != -1
+        double = move.value.find("2") != -1
         rotation = 90 if clockwise else -90
+        rotation = rotation*2 if double else rotation
         dp = calc_rotation_matrix_for_rubiks_side(v1, v2, self.square_num, self.mini_cubes[orientation.value].size, rotation)
 
         for i,mini in enumerate(self.sides[orientation.value]):

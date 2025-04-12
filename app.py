@@ -28,7 +28,7 @@ rubiks_algorythm = None
 running = True
 
 def init():
-    global clock, rubiks_data, rubiks_display, rotation_angle_x, rotation_angle_y, rubiks_algorythm, timer_start, view_angle_anim_x, view_angle_anim_y
+    global clock, rubiks_data, rubiks_display, rotation_angle_x, rotation_angle_y, rubiks_algorythm, view_angle_anim_x, view_angle_anim_y, pause_solver
 
     # init pygame window
     pygame.init()
@@ -46,9 +46,9 @@ def init():
     # app data
     clock = pygame.time.Clock()
     rotation_angle_x = 0
-    timer_start = 0
     view_angle_anim_x = None
     view_angle_anim_y = None
+    pause_solver = False
 
 
     # initialize cube data
@@ -66,7 +66,7 @@ def init():
 # }
 
 def loop(dt):
-    global rubiks_data, rubiks_display, rotation_angle_x, rubiks_algorythm, timer_start, view_angle_anim_x
+    global rubiks_data, rubiks_display, rotation_angle_x, rubiks_algorythm, view_angle_anim_x, pause_solver
 
     glRotatef(rotation_angle_x, 0, 1, 0)
 
@@ -81,19 +81,20 @@ def loop(dt):
     # pobranie nowego ruchu z algorytmu do wyswietlenia 
     else:
         # update kolorow z poprzedniego ruchu
-        rubiks_display.set_all_colours(rubiks_data.sides)
+        if not rubiks_display.is_currently_coloured():
+            rubiks_display.set_all_colours(rubiks_data.sides)
 
         # nowy ruch kostki
-        move = rubiks_algorythm.get_next_move()
-        rubiks_data.perform_move(move)
-        
-        rubiks_display.animate_move(move, 0.8) # jesli bez animacji to trzeba wykomentowac
-        timer_start = clock.get_time() / 1000  # czas w sekundach
+        if not pause_solver:
+            move = rubiks_algorythm.get_next_move()
+            rubiks_data.perform_move(move)
+            
+            rubiks_display.animate_move(move, 0.8) # jesli bez animacji to trzeba wykomentowac
 
     rubiks_display.draw()  # Rysowanie kostki Rubika
         
 def main():
-    global clock, rotation_angle_x, rotation_angle_y, view_angle_anim_x, view_angle_anim_y
+    global clock, rotation_angle_x, rotation_angle_y, view_angle_anim_x, view_angle_anim_y, pause_solver
 
     init()
 
@@ -114,6 +115,8 @@ def main():
                 view_angle_anim_x = Animation(VIEW_CHANGE_DURATION,rotation_angle_x,rotation_angle_x+VIEW_CHANGE_AMOUNT)
             if (event.type == KEYDOWN and event.key == K_RIGHT):
                 view_angle_anim_x = Animation(VIEW_CHANGE_DURATION,rotation_angle_x,rotation_angle_x-VIEW_CHANGE_AMOUNT)
+            if (event.type == KEYDOWN and event.key == K_SPACE):
+                pause_solver = not pause_solver
 
         if usr_quit_action: break
         

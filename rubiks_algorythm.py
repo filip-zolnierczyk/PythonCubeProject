@@ -16,6 +16,9 @@ class RubiksAlgorythm:
         self.progress = (self.progress + 1) % len(self.move_sequence)
         print(f"Performing move: {move.value}")
         return move
+    
+    def get_upcoming_moves(self):
+        return self.move_sequence[self.progress:min(len(self.move_sequence)-1,self.progress+5)]
 
     def generate_move_sequence(self, initial_state):
         #if self.algorythm == "CFOP":

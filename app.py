@@ -8,6 +8,7 @@ import rubiks_display as rubiks_display_file
 import rubiks_algorythm as rubiks_algorythm_file
 from util.vector_util import V3_ZERO
 from util.animation_util import *
+import app_ui
 
 """ 
     green - front
@@ -26,20 +27,25 @@ rubiks_display = None
 rubiks_data = None
 rubiks_algorythm = None
 running = True
+ui = None
+display = None
 
 def init():
-    global clock, rubiks_data, rubiks_display, rotation_angle_x, rotation_angle_y, rubiks_algorythm, view_angle_anim_x, view_angle_anim_y, pause_solver
+    global clock, rubiks_data, rubiks_display, rotation_angle_x, rotation_angle_y, rubiks_algorythm, view_angle_anim_x, view_angle_anim_y, pause_solver, ui, display
 
     # init pygame window
+    WINDOW_WIDTH = 1200
+    WINDOW_HEIGHT = int(WINDOW_WIDTH * (9/16))
     pygame.init()
-    display = (800, 600)
+    display = (WINDOW_WIDTH, WINDOW_HEIGHT)
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
     pygame.display.set_caption("Rubik's Cube")
     
     # init opengl
+    glutInit()
     glEnable(GL_DEPTH_TEST)
     glClearColor(0.2, 0.2, 0.2, 1.0)
-    gluPerspective(45, (800 / 600), 0.1, 50.0)
+    gluPerspective(45, (WINDOW_WIDTH / WINDOW_HEIGHT), 0.1, 50.0)
     glTranslatef(0.0, 0.0, -5)
     glRotatef(45, 1, 1, 0)
 
@@ -49,30 +55,23 @@ def init():
     view_angle_anim_x = None
     view_angle_anim_y = None
     pause_solver = False
-
+    display = (WINDOW_WIDTH, WINDOW_HEIGHT)
+    ui = app_ui.AppUI(display)
+    ui.create_bottom_ui_panel()
 
     # initialize cube data
     rubiks_data = rubiks_data_file.RubiksCube()
     rubiks_display = rubiks_display_file.RubiksCubeDisplay(3, V3_ZERO, 1, rubiks_data.sides)
     rubiks_algorythm = rubiks_algorythm_file.RubiksAlgorythm("CFOP", rubiks_data.sides) # przykladowo
 
-# test_col_dict = {
-#     'g': "ggyrywybw",
-#     'r': "ggyrywybw",
-#     'b': "ggyrywybw",
-#     'o': "ggyrywybw",
-#     'y': "ggyrywybw",
-#     'w': "ggyrywybw",
-# }
-
 def loop(dt):
-    global rubiks_data, rubiks_display, rotation_angle_x, rubiks_algorythm, view_angle_anim_x, pause_solver
+    global rubiks_data, rubiks_display, rotation_angle_x, rubiks_algorythm, view_angle_anim_x, pause_solver, ui, display
 
-    glRotatef(rotation_angle_x, 0, 1, 0)
 
     # animacja zmiany widoku kostki (strzalki <- i -> )
     if view_angle_anim_x is not None and view_angle_anim_x.is_animating(dt):
         rotation_angle_x = view_angle_anim_x.get_animation_value()
+    glRotatef(rotation_angle_x, 0, 1, 0)
 
     # animacja ruchu scianki kostki
     if rubiks_display.is_animating():
@@ -94,7 +93,7 @@ def loop(dt):
     rubiks_display.draw()  # Rysowanie kostki Rubika
         
 def main():
-    global clock, rotation_angle_x, rotation_angle_y, view_angle_anim_x, view_angle_anim_y, pause_solver
+    global clock, rotation_angle_x, rotation_angle_y, view_angle_anim_x, view_angle_anim_y, pause_solver, ui, display
 
     init()
 
@@ -118,6 +117,8 @@ def main():
             if (event.type == KEYDOWN and event.key == K_SPACE):
                 pause_solver = not pause_solver
 
+            ui.handle_event(event)
+
         if usr_quit_action: break
         
         # poczatek rysowania
@@ -129,7 +130,11 @@ def main():
 
         # koniec rysowania
         glPopMatrix()
+        ui.draw()
         pygame.display.flip()
+
+        # Rysowanie UI po OpenGL
+        screen_surface = pygame.display.get_surface()
     
     pygame.quit()
 

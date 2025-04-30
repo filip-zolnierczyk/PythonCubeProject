@@ -1,4 +1,4 @@
-from PythonCubeProject.util.rubiks_move_util import next_side, previous_side, opposite_side
+from util.rubiks_move_util import next_side, previous_side, opposite_side
 
 
 def corner_insert_right(cube):

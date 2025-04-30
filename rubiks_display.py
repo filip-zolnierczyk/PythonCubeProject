@@ -67,17 +67,17 @@ class RubiksCubeDisplay:
         # uporzadkuj mini-kostki do poprawnej orientacji (1: xyz 2: xyz 3: xyz) po kolei rzedy od gory do dolu
         """ 
             green - front
-            red - right
+            red - left
             blue - back
-            orange - left
+            orange - right
             yellow - top
             white - bottom
         """
         self.sides = [
             [self.sides[0][i + j*square_num] for i in reversed(range(square_num)) for j in range(square_num)], # kolumny --> rzedy
-            self.sides[1][::-1], # obrot 180 stopni
+            [self.sides[1][(square_num - 1 - j) + i*square_num] for i in reversed(range(square_num)) for j in reversed(range(square_num))],
             [self.sides[2][i + j*square_num] for i in reversed(range(square_num)) for j in reversed(range(square_num))], # kolumny --> rzedy
-            [self.sides[3][(square_num - 1 - j) + i*square_num] for i in reversed(range(square_num)) for j in reversed(range(square_num))],
+            self.sides[3][::-1], # obrot 180 stopni
             [self.sides[4][i + j*square_num] for i in range(square_num) for j in range(square_num)], # kolumny --> rzedy
             [self.sides[5][i + j*square_num] for i in reversed(range(square_num)) for j in range(square_num)], # kolumny --> rzedy
         ]
@@ -133,7 +133,7 @@ class RubiksCubeDisplay:
         v1,v2 = face_local_vectors[move.value]
         orientation_code = convert_move_to_face(move)
         orientation = code_to_orientation(orientation_code)
-        clockwise = move.value.find("'") != -1
+        clockwise = not (move.value.find("'") != -1)
         double = move.value.find("2") != -1
         rotation = 90 if clockwise else -90
         rotation = rotation*2 if double else rotation

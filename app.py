@@ -12,9 +12,9 @@ import app_ui
 
 """ 
     green - front
-    red - right
+    red - left
     blue - back
-    orange - left
+    orange - right
     yellow - top
     white - bottom
 """
@@ -43,7 +43,7 @@ def init():
     
     # init opengl
     glutInit()
-    glEnable(GL_DEPTH_TEST)
+    glEnable(GL_DEPTH_TEST) 
     glClearColor(0.2, 0.2, 0.2, 1.0)
     gluPerspective(45, (WINDOW_WIDTH / WINDOW_HEIGHT), 0.1, 50.0)
     glTranslatef(0.0, 0.0, -5)
@@ -56,8 +56,8 @@ def init():
     view_angle_anim_y = None
     pause_solver = False
     display = (WINDOW_WIDTH, WINDOW_HEIGHT)
-    ui = app_ui.AppUI(display)
-    ui.create_bottom_ui_panel()
+    # ui = app_ui.AppUI(display)
+    # ui.create_bottom_ui_panel()
 
     # initialize cube data
     rubiks_data = rubiks_data_file.RubiksCube()
@@ -87,6 +87,8 @@ def loop(dt):
         if not pause_solver:
             move = rubiks_algorythm.get_next_move()
             rubiks_data.perform_move(move)
+
+            print(rubiks_data.sides)
             
             rubiks_display.animate_move(move, 0.8) # jesli bez animacji to trzeba wykomentowac
 
@@ -117,7 +119,7 @@ def main():
             if (event.type == KEYDOWN and event.key == K_SPACE):
                 pause_solver = not pause_solver
 
-            ui.handle_event(event)
+            #ui.handle_event(event)
 
         if usr_quit_action: break
         
@@ -130,7 +132,7 @@ def main():
 
         # koniec rysowania
         glPopMatrix()
-        ui.draw()
+        #ui.draw()
         pygame.display.flip()
 
         # Rysowanie UI po OpenGL

@@ -2,9 +2,9 @@ from enum import Enum
 
 class Orientation(Enum):
     FRONT = 0
-    RIGHT = 1
+    LEFT = 1
     BACK = 2
-    LEFT = 3
+    RIGHT = 3
     TOP = 4
     BOTTOM = 5
 
@@ -12,11 +12,11 @@ def code_to_orientation(code):
     if code == 'g':
         return Orientation.FRONT
     elif code == 'r':
-        return Orientation.RIGHT
+        return Orientation.LEFT
     elif code == 'b':
         return Orientation.BACK
     elif code == 'o':
-        return Orientation.LEFT
+        return Orientation.RIGHT
     elif code == 'y':
         return Orientation.TOP
     elif code == 'w':
@@ -27,11 +27,11 @@ def code_to_orientation(code):
 def orientation_to_code(orientation):
     if orientation == Orientation.FRONT:
         return 'g'
-    elif orientation == Orientation.RIGHT:
+    elif orientation == Orientation.LEFT:
         return 'r'
     elif orientation == Orientation.BACK:
         return 'b'
-    elif orientation == Orientation.LEFT:
+    elif orientation == Orientation.RIGHT:
         return 'o'
     elif orientation == Orientation.TOP:
         return 'y'

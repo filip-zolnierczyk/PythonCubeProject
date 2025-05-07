@@ -7,11 +7,15 @@ class RubiksCube:
         self.bottom_side = 'w'
         self.top_side = 'y'
         self.sides = {"g": "", "r": "", "b": "", "o": "", "y": "", "w": ""}
+        self.performed_moves = []
 
         codes = ['g', 'r', 'b', 'o', 'y', 'w']
 
         for i, t in enumerate(tab):
             self.sides[codes[i]] = t
+
+    def clear_performed_moves(self):
+        self.performed_moves = []
 
     def rotate_face(self, side, clockwise=True):
         face = list(self.sides[side])
@@ -97,23 +101,43 @@ class RubiksCube:
                 self.perform_f_move(self)
 
     def perform_r_move(self, clockwise=True):
+        if clockwise:
+            self.performed_moves.append("R")
+        else:
+            self.performed_moves.append("R'")
         self.rotate_cube(True)
         self.perform_f_move(clockwise)
         self.rotate_cube(False)
 
     def perform_l_move(self, clockwise=True):
+        if clockwise:
+            self.performed_moves.append("L")
+        else:
+            self.performed_moves.append("L'")
         self.rotate_cube(False)
         self.perform_f_move(clockwise)
         self.rotate_cube(True)
 
     def perform_b_move(self, clockwise=True):
-        for i in range(2): self.rotate_cube(True)
+
+        if clockwise:
+            self.performed_moves.append("B")
+
+        else:
+            self.performed_moves.append("B'")
+
+        for i in range(2):
+            self.rotate_cube(True)
+
         self.perform_f_move(clockwise)
-        for i in range(2): self.rotate_cube(True)
+
+        for i in range(2):
+            self.rotate_cube(True)
 
     def perform_u_move(self, clockwise=True):
 
         if clockwise:
+            self.performed_moves.append("U")
             self.rotate_face(self.top_side, clockwise)
             face = self.sides[self.facing_user][:3]
             right = self.sides[next_side(self.facing_user)][:3]
@@ -127,6 +151,7 @@ class RubiksCube:
             self.sides[previous_side(self.facing_user)] = face + self.sides[previous_side(self.facing_user)][3:]
 
         else:
+            self.performed_moves.append("U'")
             for i in range(3):
                 self.perform_u_move(clockwise=True)
 
@@ -137,15 +162,16 @@ class RubiksCube:
                       next_side(next_side(self.facing_user)),
                       previous_side(self.facing_user)]
 
-        # Pobieramy dolne trzy elementy z każdej ściany
         rows = [self.sides[key][-3:] for key in sides_keys]
 
         if clockwise:
+            self.performed_moves.append("D")
             self.rotate_face(self.bottom_side, clockwise)
             for i in range(4):
                 key = sides_keys[(i + 1) % 4]
                 self.sides[key] = self.sides[key][:-3] + rows[i]
         else:
+            self.performed_moves.append("D'")
             for i in range(3):
                 self.perform_d_move(clockwise=True)
 

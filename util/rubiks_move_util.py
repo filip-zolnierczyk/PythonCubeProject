@@ -1,44 +1,50 @@
 from enum import Enum
+from os import remove
+
 from numpy.f2py.auxfuncs import throw_error
 import string
 
+from sympy import elliptic_f
+
+
 class RubiksMove(Enum):
     # Główne ruchy 90° zgodnie z ruchem wskazówek zegara
-    U = "U"   # Up
-    D = "D"   # Down
-    L = "L"   # Left
-    R = "R"   # Right
-    F = "F"   # Front
-    B = "B"   # Back
+    U = "U"  # Up
+    D = "D"  # Down
+    L = "L"  # Left
+    R = "R"  # Right
+    F = "F"  # Front
+    B = "B"  # Back
 
     # Ruchy przeciwnie do ruchu wskazówek zegara (prime)
-    U_PRIME = "U'"   # Up inverse
-    D_PRIME = "D'"   # Down inverse
-    L_PRIME = "L'"   # Left inverse
-    R_PRIME = "R'"   # Right inverse
-    F_PRIME = "F'"   # Front inverse
-    B_PRIME = "B'"   # Back inverse
+    U_PRIME = "U'"  # Up inverse
+    D_PRIME = "D'"  # Down inverse
+    L_PRIME = "L'"  # Left inverse
+    R_PRIME = "R'"  # Right inverse
+    F_PRIME = "F'"  # Front inverse
+    B_PRIME = "B'"  # Back inverse
 
     # Ruchy o 180 stopni
-    U2 = "U2"   # Up 180°
-    D2 = "D2"   # Down 180°
-    L2 = "L2"   # Left 180°
-    R2 = "R2"   # Right 180°
-    F2 = "F2"   # Front 180°
-    B2 = "B2"   # Back 180°
+    U2 = "U2"  # Up 180°
+    D2 = "D2"  # Down 180°
+    L2 = "L2"  # Left 180°
+    R2 = "R2"  # Right 180°
+    F2 = "F2"  # Front 180°
+    B2 = "B2"  # Back 180°
 
     # Obrót całej kostki (rotacje globalne)
-    X = "X"     # Rotacja wokół osi X (jak R)
+    X = "X"  # Rotacja wokół osi X (jak R)
     X_PRIME = "X'"
     X2 = "X2"
 
-    Y = "Y"     # Rotacja wokół osi Y (jak U)
+    Y = "Y"  # Rotacja wokół osi Y (jak U)
     Y_PRIME = "Y'"
     Y2 = "Y2"
 
-    Z = "Z"     # Rotacja wokół osi Z (jak F)
+    Z = "Z"  # Rotacja wokół osi Z (jak F)
     Z_PRIME = "Z'"
     Z2 = "Z2"
+
 
 def opposite_side(x):
     if x == "b":
@@ -56,6 +62,7 @@ def opposite_side(x):
     else:
         throw_error("Color does not exist")
 
+
 def next_side(x):
     if x == "b":
         return "r"
@@ -67,6 +74,7 @@ def next_side(x):
         return "b"
     else:
         throw_error("Color does not exist")
+
 
 def previous_side(x):
     if x == "b":
@@ -80,6 +88,7 @@ def previous_side(x):
     else:
         raise ValueError("Color does not exist")
 
+
 """ 
     green - front
     red - right
@@ -88,6 +97,7 @@ def previous_side(x):
     yellow - top
     white - bottom
 """
+
 
 def convert_move_to_face(move: string):
     if move.value.find("F") != -1: return 'g'
@@ -98,13 +108,44 @@ def convert_move_to_face(move: string):
     if move.value.find("D") != -1: return 'w'
     return 'x'
 
+
 def convert_table_to_side(t):
     string = t[0] + t[3] + t[6] + t[1] + t[4] + t[7] + t[2] + t[5] + t[8]
     return string
 
+
 def optimize_move_table(t):
-    #usuwanie ruchów które od razu zostały cofnięte
-    for i in range(len(t)-2):
-        pass
+    for i in range(2):
+        #usuwanie ruchów które od razu zostały cofnięte
+        for i in range(len(t) - 2):
+            if t[i][0] == t[i + 1][0] and len(t[i]) + len(t[i + 1]) == 3:
+                t[i] = "#"
+                t[i + 1] = "#"
 
+        t[:] = [move for move in t if move != "#"]
+        #usuwanie ruchów które zostały powtórzone 4 razy lub zamiana 3 na 1 w przypadku 3 powtórzeń
+        for i in range(len(t) - 4):
+            if t[i] == t[i + 1] == t[i + 2]:
+                if t[i] == t[i + 3]:
+                    for j in range(4):
+                        t[i + j] = "#"
+                else:
+                    if len(t[i]) == 2:
+                        t[i] = t[i][0]
+                        t[i + 1] = "#"
+                        t[i + 2] = "#"
+                    else:
+                        t[i] = t[i] + "'"
+                        t[i + 1] = "#"
+                        t[i + 2] = "#"
+        t[:] = [move for move in t if move != "#"]
+        t[:] = [move for move in t if move != "#'"]
 
+    #zamiana podwójnych ruchów na notacje z 2
+    for i in range(len(t) - 2):
+        if t[i] == t[i + 1]:
+            t[i] = t[i][0] + "2"
+            t[i + 1] = "#"
+
+    t[:] = [move for move in t if move != "#"]
+    return

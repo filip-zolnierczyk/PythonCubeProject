@@ -61,17 +61,24 @@ class RubiksCube:
         else:
             raise ValueError(f"Nieznany ruch: {move_str}")
 
-    def rotate_cube(self, clockwise=True):
+    def rotate_cube_no_append(self, clockwise=True):
         if clockwise:
             self.facing_user = next_side(self.facing_user)
             self.rotate_face(self.top_side, clockwise)
             self.rotate_face(self.bottom_side, not clockwise)
 
         if not clockwise:
-            for i in range(3): self.rotate_cube(True)
+            for i in range(3): self.rotate_cube_no_append(True)
+
+    def rotate_cube(self, clockwise=True):
+        if clockwise:
+            self.performed_moves.append("x")
+        else:
+            self.performed_moves.append("x'")
+        self.rotate_cube_no_append(clockwise)
 
     #w przypadku kazdego ruchu trzeba zmienic indexację na kazdej sciance (bo sie obraca) i obrocic pozostale naklejki z 4 scian
-    def perform_f_move(self, clockwise=True):
+    def perform_f_move_no_append(self, clockwise=True):
 
         temp1 = self.sides[self.top_side][-3:]
         temp2 = self.sides[next_side(self.facing_user)][0] + self.sides[next_side(self.facing_user)][3] + \
@@ -80,10 +87,9 @@ class RubiksCube:
         temp4 = self.sides[previous_side(self.facing_user)][8] + self.sides[previous_side(self.facing_user)][5] + \
                 self.sides[previous_side(self.facing_user)][2]
 
-        if clockwise:  #działa
+        self.rotate_face(self.facing_user, clockwise)
 
-            self.rotate_face(self.facing_user, clockwise)
-
+        if clockwise:  # działa
             self.sides[self.top_side] = self.sides[self.top_side][:6] + temp4
 
             self.sides[next_side(self.facing_user)] = temp1[0] + self.sides[next_side(self.facing_user)][1:3] + temp1[
@@ -97,42 +103,56 @@ class RubiksCube:
                                                           self.sides[previous_side(self.facing_user)][6:8] + temp3[2]
 
         else:
-            for i in range(3):
-                self.perform_f_move(self)
+            self.sides[self.top_side] = self.sides[self.top_side][:6] + temp2
+
+            self.sides[next_side(self.facing_user)] = temp3[2] + self.sides[next_side(self.facing_user)][1:3] + temp3[
+                1] + self.sides[next_side(self.facing_user)][4:6] + temp3[0] + self.sides[next_side(self.facing_user)][
+                                                                               7:9]
+
+            self.sides[self.bottom_side] = temp4[::-1] + self.sides[self.bottom_side][3:]
+
+            self.sides[previous_side(self.facing_user)] = self.sides[previous_side(self.facing_user)][0:2] + temp1[2] + \
+                                                          self.sides[previous_side(self.facing_user)][3:5] + temp1[1] + \
+                                                          self.sides[previous_side(self.facing_user)][6:8] + temp1[0]
+
+    def perform_f_move(self, clockwise=True):
+        if clockwise:
+            self.performed_moves.append("F")
+        else:
+            self.performed_moves.append("F'")
+        self.perform_f_move_no_append(clockwise)
 
     def perform_r_move(self, clockwise=True):
         if clockwise:
             self.performed_moves.append("R")
         else:
             self.performed_moves.append("R'")
-        self.rotate_cube(True)
-        self.perform_f_move(clockwise)
-        self.rotate_cube(False)
+        self.rotate_cube_no_append(True)
+        self.perform_f_move_no_append(clockwise)
+        self.rotate_cube_no_append(False)
 
     def perform_l_move(self, clockwise=True):
         if clockwise:
             self.performed_moves.append("L")
         else:
             self.performed_moves.append("L'")
-        self.rotate_cube(False)
-        self.perform_f_move(clockwise)
-        self.rotate_cube(True)
+        self.rotate_cube_no_append(False)
+        self.perform_f_move_no_append(clockwise)
+        self.rotate_cube_no_append(True)
 
     def perform_b_move(self, clockwise=True):
-
         if clockwise:
             self.performed_moves.append("B")
-
         else:
             self.performed_moves.append("B'")
 
         for i in range(2):
-            self.rotate_cube(True)
+            self.rotate_cube_no_append(True)
 
-        self.perform_f_move(clockwise)
+        self.perform_f_move_no_append(clockwise)
 
         for i in range(2):
-            self.rotate_cube(True)
+            self.rotate_cube_no_append(True)
 
     def perform_u_move(self, clockwise=True):
 

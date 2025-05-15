@@ -14,6 +14,9 @@ c.perform_u_move()
 c.perform_l_move()
 c.perform_u_move(False)
 c.perform_b_move(False)
+c.perform_l_move()
+c.perform_u_move()
+c.perform_l_move()
 c.perform_u_move()
 c.perform_d_move(False)
 c.display_cube()
@@ -21,6 +24,8 @@ c.display_cube()
 solve_lbl(c)
 print("-------------------")
 c.display_cube()
+print(c.performed_moves)
+print(len(c.performed_moves))
 
 
 

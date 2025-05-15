@@ -156,6 +156,23 @@ def insert_bottom_corners(cube): #działa a nie powinno xd
 
 def insert_edges(cube):
     while not (cube.sides["g"][3:6] == "ggg" and cube.sides["r"][3:6] == "rrr" and cube.sides["b"][3:6] == "bbb" and cube.sides["o"][3:6] == "ooo"):
+        # edge case
+        t = []
+        t.append(cube.sides["g"][1])
+        t.append(cube.sides["r"][1])
+        t.append(cube.sides["b"][1])
+        t.append(cube.sides["o"][1])
+        for a in range(4):
+            t.append(cube.sides[cube.top_side][1 + a * 2])
+        if t.count("y") == 4:
+            for b in range(4):
+                if cube.sides[cube.facing_user][4] != cube.sides[cube.facing_user][5]:
+                    cube.perform_u_move()
+                    corner_insert_right(cube)
+                    cube.rotate_cube()
+                    corner_insert_left(cube)
+                    cube.rotate_cube(False)
+                cube.rotate_cube()
         for j in range(4):
             if cube.sides[cube.facing_user][1] == cube.facing_user:
 
@@ -174,18 +191,6 @@ def insert_edges(cube):
                     cube.rotate_cube()
 
             cube.perform_u_move()
-
-        #edge case
-        t = []
-        t.append(cube.sides["g"][1])
-        t.append(cube.sides["r"][1])
-        t.append(cube.sides["b"][1])
-        t.append(cube.sides["0"][1])
-        for a in range(4):
-            t.append(cube.sides[cube.top_side][1+a*2])
-        if t.count("y") == 4:
-            pass
-
 
         cube.rotate_cube()
 

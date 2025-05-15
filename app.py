@@ -56,8 +56,8 @@ def init():
     view_angle_anim_y = None
     pause_solver = False
     display = (WINDOW_WIDTH, WINDOW_HEIGHT)
-    # ui = app_ui.AppUI(display)
-    # ui.create_bottom_ui_panel()
+    ui = app_ui.AppUI(display)
+    ui.create_bottom_ui_panel()
 
     # initialize cube data
     rubiks_data = rubiks_data_file.RubiksCube()
@@ -74,23 +74,21 @@ def loop(dt):
     glRotatef(rotation_angle_x, 0, 1, 0)
 
     # animacja ruchu scianki kostki
-    if rubiks_display.is_animating():
-        rubiks_display.update_animation(dt)
+    finished_anim = rubiks_display.update_animation(dt)
 
     # pobranie nowego ruchu z algorytmu do wyswietlenia 
-    else:
+    if finished_anim:
         # update kolorow z poprzedniego ruchu
         if not rubiks_display.is_currently_coloured():
+            rubiks_display.reset_all_animations()
             rubiks_display.set_all_colours(rubiks_data.sides)
 
         # nowy ruch kostki
         if not pause_solver:
+            ui.update_bottom_ui_panel(rubiks_algorythm.get_upcoming_moves())
             move = rubiks_algorythm.get_next_move()
-            rubiks_data.perform_move(move)
-
-            print(rubiks_data.sides)
-            
-            rubiks_display.animate_move(move, 0.8) # jesli bez animacji to trzeba wykomentowac
+            rubiks_data.perform_move(move)            
+            rubiks_display.animate_move(move, 0.8)
 
     rubiks_display.draw()  # Rysowanie kostki Rubika
         
@@ -119,7 +117,7 @@ def main():
             if (event.type == KEYDOWN and event.key == K_SPACE):
                 pause_solver = not pause_solver
 
-            #ui.handle_event(event)
+            ui.handle_event(event)
 
         if usr_quit_action: break
         
@@ -132,7 +130,7 @@ def main():
 
         # koniec rysowania
         glPopMatrix()
-        #ui.draw()
+        ui.draw()
         pygame.display.flip()
 
         # Rysowanie UI po OpenGL

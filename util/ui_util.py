@@ -79,15 +79,88 @@ class Button(Panel):
                     self.callback()
 
 class Text(UIElement):
-    def __init__(self, x, y, text, color=(1, 1, 1), font_size=16):
+    def __init__(self, x, y, text, font_size=16, color=(255, 255, 255)):
         super().__init__(x, y, 0, 0)
+        self.x = x
+        self.y = y
         self.text = text
         self.color = color
         self.font_size = font_size  # Placeholder, font rendering requires extra setup
 
-    def draw(self):
-        # To implement: Requires font rendering (e.g. using freetype)
-        pass
+    def draw(self, display_size=None):
+        font = pygame.font.Font(pygame.font.get_default_font(), self.font_size)
+        text_surface = font.render(self.text, True, self.color).convert_alpha()
+        text_data = pygame.image.tostring(text_surface, "RGBA", True)
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        glWindowPos2f(self.x,self.y)
+        glDrawPixels(text_surface.get_width(), text_surface.get_height(), GL_RGBA, GL_UNSIGNED_BYTE, text_data)
+
+class Image(UIElement):
+    def __init__(self, x, y, width, height, image_path):
+        super().__init__(x, y, width, height)
+        self.texture_id = None
+        self.image_path = image_path
+        self.image_width = 0
+        self.image_height = 0
+        self._load_texture()
+
+    def _load_texture(self):
+        surface = pygame.image.load(self.image_path).convert_alpha()
+        image_data = pygame.image.tostring(surface, "RGBA")
+        self.image_width, self.image_height = surface.get_size()
+
+        self.texture_id = glGenTextures(1)
+        glBindTexture(GL_TEXTURE_2D, self.texture_id)
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, self.image_width, self.image_height, 0,
+                     GL_RGBA, GL_UNSIGNED_BYTE, image_data)
+
+    def draw(self, display_size):
+        if not self.visible or self.texture_id is None:
+            return
+
+        x, y, w, h = self.x, self.y, self.width, self.height
+        screen_w, screen_h = display_size
+
+        glEnable(GL_TEXTURE_2D)
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        glBindTexture(GL_TEXTURE_2D, self.texture_id)
+        glColor4f(1.0, 1.0, 1.0, 1.0)
+
+        # 2D ortho matrix
+        glMatrixMode(GL_PROJECTION)
+        glPushMatrix()
+        glLoadIdentity()
+        glOrtho(0, screen_w, screen_h, 0, -1, 1)
+        glMatrixMode(GL_MODELVIEW)
+        glPushMatrix()
+        glLoadIdentity()
+
+        # Rysowanie skalowanego prostokąta z teksturą
+        glBegin(GL_QUADS)
+        glTexCoord2f(0, 0)
+        glVertex2f(x, y)
+        glTexCoord2f(1, 0)
+        glVertex2f(x + w, y)
+        glTexCoord2f(1, 1)
+        glVertex2f(x + w, y + h)
+        glTexCoord2f(0, 1)
+        glVertex2f(x, y + h)
+        glEnd()
+
+        glDisable(GL_TEXTURE_2D)
+
+        # Restore matrix
+        glPopMatrix()
+        glMatrixMode(GL_PROJECTION)
+        glPopMatrix()
+        glMatrixMode(GL_MODELVIEW)
+
 
 # ============ UTIL METHODS ============
 
@@ -99,6 +172,9 @@ def create_button(x, y, width, height, **kwargs):
 
 def create_text(x, y, text, **kwargs):
     return Text(x, y, text, **kwargs)
+
+def create_img(x,y, width,height, path):
+    return Image(x,y,width,height,path)
 
 def position_relative(display_size, rel_x=0.0, rel_y=0.0, width=100, height=50):
     """Pozycjonowanie w zaleznosci od rozdzielczosci: rel_x, rel_y od 0.0 do 1.0"""

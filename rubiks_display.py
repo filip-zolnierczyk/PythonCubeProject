@@ -108,25 +108,31 @@ class RubiksCubeDisplay:
     
     def update_animation(self, dt):
         # Animate positions
+        all_stopped_anim = True
         for i,anim_obj in enumerate(self.position_animation_objects):
             mini, anim = anim_obj
-            if not anim.is_animating(dt):
-                mini.origin = anim.get_reset_value()
-                self.position_animation_objects.pop(i)
-            else:
+            if anim.is_animating(dt):
                 mini.origin = anim.get_animation_value()
+                all_stopped_anim = False
+            else:
+                mini.origin = anim.get_reset_value()
+
 
         # Animate Rotations
         for i,anim_obj in enumerate(self.rotation_animation_objects):
             mini, anim = anim_obj
-            if not anim.is_animating(dt):
-                mini.local_rotation = anim.get_reset_value()
-                self.rotation_animation_objects.pop(i)
-            else:
+            if anim.is_animating(dt):
                 mini.local_rotation = anim.get_animation_value()
+                all_stopped_anim = False
+            else:
+                mini.local_rotation = anim.get_reset_value()
 
-    def is_animating(self):
-        return len(self.position_animation_objects) > 0 or len(self.rotation_animation_objects) > 0
+        return all_stopped_anim
+
+
+    def reset_all_animations(self):
+        self.position_animation_objects.clear()
+        self.rotation_animation_objects.clear()
     
     def animate_move(self, move: RubiksMove, duration: float):
         self.is_coloured = False

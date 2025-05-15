@@ -19,8 +19,8 @@ class RubiksAlgorythm:
         print(f"Performing move: {move.value}")
         return move
     
-    def get_upcoming_moves(self):
-        return self.move_sequence[self.progress:min(len(self.move_sequence)-1,self.progress+5)]
+    def get_upcoming_moves(self, move_num=4):
+        return self.move_sequence[self.progress:min(len(self.move_sequence)-1,self.progress+move_num)]
 
     def generate_move_sequence(self, initial_state):
         if self.algorythm == "LBL":

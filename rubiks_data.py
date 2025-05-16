@@ -84,7 +84,7 @@ class RubiksCube:
         }
 
         if base_move in move_function_map:
-            #base_move = shift_move_xyz(base_move, self.global_rotation_x, self.global_rotation_y, self.global_rotation_z)
+            base_move = shift_move_xyz(base_move, self.global_rotation_x, self.global_rotation_y, self.global_rotation_z)
             for _ in range(repeat):
                 move_function_map[base_move](clockwise)
         elif base_move in ['X','Y','Z']:

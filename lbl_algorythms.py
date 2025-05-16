@@ -273,12 +273,15 @@ def position_top_corners(cube):
         if cube.facing_user in l and previous_side(cube.facing_user) in l:
             return True
 
-    for i in range(4):
-        if is_right_corner_ok(cube):
-            while not is_left_corner_ok(cube):
-                position_corners(cube)
-            return
-        cube.rotate_cube()
+    for j in range(2):
+        for i in range(4):
+            if is_right_corner_ok(cube):
+                while not is_left_corner_ok(cube):
+                    position_corners(cube)
+                return
+            cube.rotate_cube()
+        position_corners(cube)
+
 
 
 def permutate_top_corners(cube):

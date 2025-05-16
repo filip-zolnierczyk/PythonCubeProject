@@ -1,8 +1,8 @@
 from util.rubiks_move_util import *
-from random import shuffle
+
 
 class RubiksCube:
-    def __init__(self, sides_dict={"g":"ggggggggg", "r":"rrrrrrrrr", "b":"bbbbbbbbb", "o":"ooooooooo", "y":"yyyyyyyyy", "w":"wwwwwwwww"}):
+    def __init__(self, tab=["ggggggggg", "rrrrrrrrr", "bbbbbbbbb", "ooooooooo", "yyyyyyyyy", "wwwwwwwww"]):
         self.facing_user = 'g'
         self.bottom_side = 'w'
         self.top_side = 'y'
@@ -11,32 +11,11 @@ class RubiksCube:
 
         codes = ['g', 'r', 'b', 'o', 'y', 'w']
 
-        for i in range(len(sides_dict)):
-            self.sides[codes[i]] = sides_dict[codes[i]]
-
-        self.global_rotation_x = 0
-        self.global_rotation_y = 0
-        self.global_rotation_z = 0
+        for i, t in enumerate(tab):
+            self.sides[codes[i]] = t
 
     def clear_performed_moves(self):
         self.performed_moves = []
-    def get_performed_moves(self):
-        return self.performed_moves
-
-    def scramble_cube(self):
-        scramble_moves = [
-            RubiksMove.F, #RubiksMove.F_PRIME,
-            RubiksMove.R, #RubiksMove.R_PRIME,
-            RubiksMove.B, #RubiksMove.B_PRIME,
-            RubiksMove.L, #RubiksMove.L_PRIME,
-            RubiksMove.U, #RubiksMove.U_PRIME,
-            RubiksMove.D, #RubiksMove.D_PRIME,
-        ]
-
-        for i in range(2):
-            shuffle(scramble_moves)
-            for m in scramble_moves:
-                self.perform_move(m)
 
     def rotate_face(self, side, clockwise=True):
         face = list(self.sides[side])
@@ -53,13 +32,6 @@ class RubiksCube:
                 face[0], face[3], face[6]
             ]
         self.sides[side] = "".join(rotated_face)
-
-    def rotate_cube_global(self, base_move: string, clockwise: bool):
-        clockwise_mult = 1 if clockwise else -1
-        match base_move:
-            case 'X': self.global_rotation_x = (self.global_rotation_x + clockwise_mult) % 3
-            case 'Y': self.global_rotation_y += (self.global_rotation_y + clockwise_mult) % 3
-            case 'Z': self.global_rotation_z += (self.global_rotation_z + clockwise_mult) % 3
 
     def perform_move(self, move: RubiksMove):
         # Mapowanie enum -> funkcja + kierunek
@@ -84,12 +56,8 @@ class RubiksCube:
         }
 
         if base_move in move_function_map:
-            base_move = shift_move_xyz(base_move, self.global_rotation_x, self.global_rotation_y, self.global_rotation_z)
             for _ in range(repeat):
                 move_function_map[base_move](clockwise)
-        elif base_move in ['X','Y','Z']:
-            # breakpoint
-            self.rotate_cube_global(base_move,clockwise)
         else:
             raise ValueError(f"Nieznany ruch: {move_str}")
 
@@ -104,9 +72,9 @@ class RubiksCube:
 
     def rotate_cube(self, clockwise=True):
         if clockwise:
-            self.performed_moves.append(RubiksMove.X)
+            self.performed_moves.append("x")
         else:
-            self.performed_moves.append(RubiksMove.X_PRIME)
+            self.performed_moves.append("x'")
         self.rotate_cube_no_append(clockwise)
 
     #w przypadku kazdego ruchu trzeba zmienic indexację na kazdej sciance (bo sie obraca) i obrocic pozostale naklejki z 4 scian
@@ -149,34 +117,34 @@ class RubiksCube:
 
     def perform_f_move(self, clockwise=True):
         if clockwise:
-            self.performed_moves.append(RubiksMove.F)
+            self.performed_moves.append("F")
         else:
-            self.performed_moves.append(RubiksMove.F_PRIME)
+            self.performed_moves.append("F'")
         self.perform_f_move_no_append(clockwise)
 
     def perform_r_move(self, clockwise=True):
         if clockwise:
-            self.performed_moves.append(RubiksMove.R)
+            self.performed_moves.append("R")
         else:
-            self.performed_moves.append(RubiksMove.R_PRIME)
+            self.performed_moves.append("R'")
         self.rotate_cube_no_append(True)
         self.perform_f_move_no_append(clockwise)
         self.rotate_cube_no_append(False)
 
     def perform_l_move(self, clockwise=True):
         if clockwise:
-            self.performed_moves.append(RubiksMove.L)
+            self.performed_moves.append("L")
         else:
-            self.performed_moves.append(RubiksMove.L_PRIME)
+            self.performed_moves.append("L'")
         self.rotate_cube_no_append(False)
         self.perform_f_move_no_append(clockwise)
         self.rotate_cube_no_append(True)
 
     def perform_b_move(self, clockwise=True):
         if clockwise:
-            self.performed_moves.append(RubiksMove.B)
+            self.performed_moves.append("B")
         else:
-            self.performed_moves.append(RubiksMove.B_PRIME)
+            self.performed_moves.append("B'")
 
         for i in range(2):
             self.rotate_cube_no_append(True)
@@ -188,14 +156,14 @@ class RubiksCube:
 
     def perform_u_move(self, clockwise=True):
 
-        if clockwise:
-            self.performed_moves.append(RubiksMove.U)
-            self.rotate_face(self.top_side, clockwise)
-            face = self.sides[self.facing_user][:3]
-            right = self.sides[next_side(self.facing_user)][:3]
-            back = self.sides[next_side(next_side(self.facing_user))][:3]
-            left = self.sides[previous_side(self.facing_user)][:3]
+        self.rotate_face(self.top_side, clockwise)
+        face = self.sides[self.facing_user][:3]
+        right = self.sides[next_side(self.facing_user)][:3]
+        back = self.sides[next_side(next_side(self.facing_user))][:3]
+        left = self.sides[previous_side(self.facing_user)][:3]
 
+        if clockwise:
+            self.performed_moves.append("U")
             self.sides[self.facing_user] = right + self.sides[self.facing_user][3:]
             self.sides[next_side(self.facing_user)] = back + self.sides[next_side(self.facing_user)][3:]
             self.sides[next_side(next_side(self.facing_user))] = left + self.sides[
@@ -203,29 +171,34 @@ class RubiksCube:
             self.sides[previous_side(self.facing_user)] = face + self.sides[previous_side(self.facing_user)][3:]
 
         else:
-            self.performed_moves.append(RubiksMove.U_PRIME)
-            for i in range(3):
-                self.perform_u_move(clockwise=True)
+            self.performed_moves.append("U'")
+            self.sides[self.facing_user] = left + self.sides[self.facing_user][3:]
+            self.sides[next_side(self.facing_user)] = face + self.sides[next_side(self.facing_user)][3:]
+            self.sides[next_side(next_side(self.facing_user))] = right + self.sides[
+                                                                            next_side(next_side(self.facing_user))][3:]
+            self.sides[previous_side(self.facing_user)] = back + self.sides[previous_side(self.facing_user)][3:]
 
     def perform_d_move(self, clockwise=True):
 
-        sides_keys = [self.facing_user,
-                      next_side(self.facing_user),
-                      next_side(next_side(self.facing_user)),
-                      previous_side(self.facing_user)]
-
-        rows = [self.sides[key][-3:] for key in sides_keys]
+        self.rotate_face(self.bottom_side, clockwise)
+        face = self.sides[self.facing_user][-3:]
+        right = self.sides[next_side(self.facing_user)][-3:]
+        back = self.sides[next_side(next_side(self.facing_user))][-3:]
+        left = self.sides[previous_side(self.facing_user)][-3:]
 
         if clockwise:
-            self.performed_moves.append(RubiksMove.D)
-            self.rotate_face(self.bottom_side, clockwise)
-            for i in range(4):
-                key = sides_keys[(i + 1) % 4]
-                self.sides[key] = self.sides[key][:-3] + rows[i]
+            self.performed_moves.append("D")
+            self.sides[self.facing_user] = self.sides[self.facing_user][:6] + left
+            self.sides[next_side(self.facing_user)] = self.sides[next_side(self.facing_user)][:6] + face
+            self.sides[next_side(next_side(self.facing_user))] = self.sides[next_side(next_side(self.facing_user))][:6] + right
+            self.sides[previous_side(self.facing_user)] = self.sides[previous_side(self.facing_user)][:6] + back
         else:
-            self.performed_moves.append(RubiksMove.D_PRIME)
-            for i in range(3):
-                self.perform_d_move(clockwise=True)
+            self.performed_moves.append("D'")
+            self.sides[self.facing_user] = self.sides[self.facing_user][:6] + right
+            self.sides[next_side(self.facing_user)] = self.sides[next_side(self.facing_user)][:6] + back
+            self.sides[next_side(next_side(self.facing_user))] = self.sides[next_side(next_side(self.facing_user))][:6] + left
+            self.sides[previous_side(self.facing_user)] = self.sides[previous_side(self.facing_user)][:6] + face
+
 
     #do debugowania
     def display_cube(self):

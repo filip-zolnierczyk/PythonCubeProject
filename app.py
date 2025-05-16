@@ -61,8 +61,9 @@ def init():
 
     # initialize cube data
     rubiks_data = rubiks_data_file.RubiksCube()
+    rubiks_data.scramble_cube()
     rubiks_display = rubiks_display_file.RubiksCubeDisplay(3, V3_ZERO, 1, rubiks_data.sides)
-    rubiks_algorythm = rubiks_algorythm_file.RubiksAlgorythm("CFOP", rubiks_data.sides) # przykladowo
+    rubiks_algorythm = rubiks_algorythm_file.RubiksAlgorythm("LBL", rubiks_data.sides)
 
 def loop(dt):
     global rubiks_data, rubiks_display, rotation_angle_x, rubiks_algorythm, view_angle_anim_x, pause_solver, ui, display
@@ -85,7 +86,7 @@ def loop(dt):
 
         # nowy ruch kostki
         if not pause_solver:
-            ui.update_bottom_ui_panel(rubiks_algorythm.get_upcoming_moves())
+            ui.update_bottom_ui_panel(rubiks_algorythm)
             move = rubiks_algorythm.get_next_move()
             rubiks_data.perform_move(move)            
             rubiks_display.animate_move(move, 0.8)

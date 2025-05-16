@@ -1,4 +1,5 @@
 from util.ui_util import *
+from rubiks_algorythm import RubiksAlgorythm
 
 class AppUI:
     def __init__(self, display_size):
@@ -27,7 +28,10 @@ class AppUI:
         self.moves_text = create_text(px,py,"F   G, F', B ...",font_size=40) #placeholder text
         self.add_element(self.moves_text)
 
-    def update_bottom_ui_panel(self,moves_arr):
+    def update_bottom_ui_panel(self,cube_alg: RubiksAlgorythm):
+        moves_arr = cube_alg.get_upcoming_moves()
+        moves_num = cube_alg.get_upcoming_move_num()
+
         text = ""
         if len(moves_arr) != 0: text = moves_arr[0].value + "       "
         for i in range(1,len(moves_arr)):
@@ -35,6 +39,7 @@ class AppUI:
                 text += moves_arr[i].value + ", " 
             else:
                 text += moves_arr[i].value + " ..."
+        text += f" ({moves_num})"
         self.moves_text.text = text
 
     def handle_event(self, event):

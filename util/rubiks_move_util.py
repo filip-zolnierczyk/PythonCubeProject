@@ -45,7 +45,6 @@ class RubiksMove(Enum):
     Z_PRIME = "Z'"
     Z2 = "Z2"
 
-
 def opposite_side(x):
     if x == "b":
         return "g"
@@ -108,11 +107,54 @@ def convert_move_to_face(move: string):
     if move.value.find("D") != -1: return 'w'
     return 'x'
 
+def shift_move_xyz(base_move, offset_x, offset_y, offset_z):
+    # kolejnosci zmiany scianek w tabelach
+    moves_order_x = ["L","F","R","B"]
+    moves_order_y = ["L","U","R","D"]
+    moves_order_z = ["D","F","U","B"]
+
+    # obroty ruchow po kolei x y z uzywajac podane offsety
+    if base_move != "U" and base_move != "D":
+        global_move_idx = moves_order_x.index(base_move)
+        if offset_x < 0: offset_x = (len(moves_order_x)-1)*abs(offset_x) # jeden ruch w lewo to to samo co n-1 ruchow w prawo
+        base_move = moves_order_x[ (global_move_idx+offset_x)%len(moves_order_x) ]
+
+    if base_move != "F" and base_move != "B":
+        global_move_idx = moves_order_y.index(base_move)
+        if offset_y < 0: offset_y = (len(moves_order_y)-1)*abs(offset_y) # jeden ruch w lewo to to samo co n-1 ruchow w prawo
+        base_move = moves_order_y[ (global_move_idx+offset_y)%len(moves_order_y) ]
+
+    if base_move != "L" and base_move != "R":
+        global_move_idx = moves_order_z.index(base_move)
+        if offset_z < 0: offset_z = (len(moves_order_z)-1)*abs(offset_z) # jeden ruch w lewo to to samo co n-1 ruchow w prawo
+        base_move = moves_order_z[ (global_move_idx+offset_z)%len(moves_order_z) ]
+
+    return base_move
+
+def code_to_move(code: string):
+    match code:
+        case "F": return RubiksMove.F
+        case "R": return RubiksMove.R
+        case "B": return RubiksMove.B
+        case "L": return RubiksMove.L
+        case "U": return RubiksMove.U
+        case "D": return RubiksMove.D
+        case "F'": return RubiksMove.F_PRIME
+        case "R'": return RubiksMove.R_PRIME
+        case "B'": return RubiksMove.B_PRIME
+        case "L'": return RubiksMove.L_PRIME
+        case "U'": return RubiksMove.U_PRIME
+        case "D'": return RubiksMove.D_PRIME
+        case "X": return RubiksMove.X
+        case "Y": return RubiksMove.Y
+        case "Z": return RubiksMove.Z
+        case "X'": return RubiksMove.X_PRIME
+        case "Y'": return RubiksMove.Y_PRIME
+        case "Z'": return RubiksMove.Z_PRIME
 
 def convert_table_to_side(t):
     string = t[0] + t[3] + t[6] + t[1] + t[4] + t[7] + t[2] + t[5] + t[8]
     return string
-
 
 def optimize_move_table(t):
     for i in range(2):

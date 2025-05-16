@@ -135,6 +135,9 @@ class RubiksCubeDisplay:
         self.rotation_animation_objects.clear()
     
     def animate_move(self, move: RubiksMove, duration: float):
+        base_move = move.value[0]
+        if base_move in ["X","Y","Z"]: return
+        
         self.is_coloured = False
         v1,v2 = face_local_vectors[move.value]
         orientation_code = convert_move_to_face(move)

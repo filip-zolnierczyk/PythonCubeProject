@@ -1,6 +1,5 @@
 from util.rubiks_move_util import *
 from random import randint
-from random import shuffle
 from lbl_algorythms import *
 from rubiks_data import RubiksCube
 
@@ -22,6 +21,9 @@ class RubiksAlgorythm:
     def get_upcoming_moves(self, move_num=4):
         return self.move_sequence[self.progress:min(len(self.move_sequence)-1,self.progress+move_num)]
 
+    def get_upcoming_move_num(self):
+        return len(self.move_sequence) - self.progress
+
     def generate_move_sequence(self, initial_state):
         if self.algorythm == "LBL":
             moves = self.solve_lbl(initial_state)
@@ -36,19 +38,20 @@ class RubiksAlgorythm:
             ]
 
         # Randomize moves array
-        #shuffle(moves)
         self.move_sequence = moves
 
     def solve_lbl(self, state):
         cube = RubiksCube(state)
-        moves = []
-        moves += white_cross(cube)
-        moves += insert_bottom_corners(cube)
-        moves += insert_edges(cube)
-        moves += yellow_cross(cube)
-        moves += allign_top_edges(cube)
-        moves += position_top_corners(cube)
-        moves += permutate_top_corners(cube)
-        moves += last_move(cube)
+        cube.clear_performed_moves()
+
+        white_cross(cube)
+        insert_bottom_corners(cube)
+        insert_edges(cube)
+        yellow_cross(cube)
+        allign_top_edges(cube)
+        position_top_corners(cube)
+        permutate_top_corners(cube)
+        last_move(cube)
+
+        moves = cube.get_performed_moves()
         return moves
-    

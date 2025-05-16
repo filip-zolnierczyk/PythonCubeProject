@@ -33,13 +33,16 @@ class AppUI:
         moves_num = cube_alg.get_upcoming_move_num()
 
         text = ""
-        if len(moves_arr) != 0: text = moves_arr[0].value + "       "
-        for i in range(1,len(moves_arr)):
-            if i < len(moves_arr)-1:
-                text += moves_arr[i].value + ", " 
-            else:
-                text += moves_arr[i].value + " ..."
-        text += f" ({moves_num})"
+        if len(moves_arr) != 0: 
+            text = moves_arr[0].value + "       "
+            for i in range(1,len(moves_arr)):
+                if i < len(moves_arr)-1:
+                    text += moves_arr[i].value + ", " 
+                else:
+                    text += moves_arr[i].value + " ..."
+            text += f" ({moves_num})"
+        else:
+            text = "       Solved!"
         self.moves_text.text = text
 
     def handle_event(self, event):

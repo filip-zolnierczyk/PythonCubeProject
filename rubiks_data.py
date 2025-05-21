@@ -1,8 +1,8 @@
 from util.rubiks_move_util import *
-
+from random import shuffle
 
 class RubiksCube:
-    def __init__(self, tab=["ggggggggg", "rrrrrrrrr", "bbbbbbbbb", "ooooooooo", "yyyyyyyyy", "wwwwwwwww"]):
+    def __init__(self, sides_dict={"g":"ggggggggg", "r":"rrrrrrrrr", "b":"bbbbbbbbb", "o":"ooooooooo", "y":"yyyyyyyyy", "w":"wwwwwwwww"}):
         self.facing_user = 'g'
         self.bottom_side = 'w'
         self.top_side = 'y'
@@ -11,11 +11,41 @@ class RubiksCube:
 
         codes = ['g', 'r', 'b', 'o', 'y', 'w']
 
-        for i, t in enumerate(tab):
-            self.sides[codes[i]] = t
+        for i in range(len(sides_dict)):
+            self.sides[codes[i]] = sides_dict[codes[i]]
+
+        self.global_rotation_x = 0
+        self.global_rotation_y = 0
+        self.global_rotation_z = 0
+
 
     def clear_performed_moves(self):
         self.performed_moves = []
+    def get_performed_moves(self):
+        return self.performed_moves
+
+    def scramble_cube(self):
+        scramble_moves = [
+            RubiksMove.F, #RubiksMove.F_PRIME,
+            RubiksMove.R, #RubiksMove.R_PRIME,
+            RubiksMove.B, #RubiksMove.B_PRIME,
+            RubiksMove.L, #RubiksMove.L_PRIME,
+            RubiksMove.U, #RubiksMove.U_PRIME,
+            RubiksMove.D, #RubiksMove.D_PRIME,
+        ]
+
+        for i in range(2):
+            shuffle(scramble_moves)
+            for m in scramble_moves:
+                self.perform_move(m)
+
+    def rotate_cube_global(self, base_move: string, clockwise: bool):
+        clockwise_mult = 1 if clockwise else -1
+        match base_move:
+            case 'X': self.global_rotation_x = (self.global_rotation_x + clockwise_mult) % 3
+            case 'Y': self.global_rotation_y += (self.global_rotation_y + clockwise_mult) % 3
+            case 'Z': self.global_rotation_z += (self.global_rotation_z + clockwise_mult) % 3
+
 
     def rotate_face(self, side, clockwise=True):
         face = list(self.sides[side])
@@ -56,8 +86,11 @@ class RubiksCube:
         }
 
         if base_move in move_function_map:
+            base_move = shift_move_xyz(base_move, self.global_rotation_x, self.global_rotation_y, self.global_rotation_z)
             for _ in range(repeat):
                 move_function_map[base_move](clockwise)
+        elif base_move in ['X','Y','Z']:
+            self.rotate_cube_global(base_move,clockwise)
         else:
             raise ValueError(f"Nieznany ruch: {move_str}")
 

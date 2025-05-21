@@ -3,6 +3,8 @@ from random import randint
 from lbl_algorythms import *
 from rubiks_data import RubiksCube
 
+upcoming_move_num_display = 4
+
 class RubiksAlgorythm:
     def __init__(self, algorythm: str = "LBL"):
         self.algorythm = algorythm
@@ -22,11 +24,11 @@ class RubiksAlgorythm:
     def is_solving(self):
         return self.solving
 
-    def get_upcoming_moves(self, move_num=4):
+    def get_upcoming_moves(self, move_num=upcoming_move_num_display):
         return self.move_sequence[self.progress:min(len(self.move_sequence)-1,self.progress+move_num)]
 
     def get_upcoming_move_num(self):
-        return len(self.move_sequence) - self.progress
+        return len(self.move_sequence)-self.progress-upcoming_move_num_display
 
     def select_rubiks_algorythm(self, alg: string):
         if alg not in ['LBL', 'test']:

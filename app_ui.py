@@ -40,7 +40,8 @@ class AppUI:
                     text += moves_arr[i].value + ", " 
                 else:
                     text += moves_arr[i].value + " ..."
-            text += f" ({moves_num})"
+            if moves_num > 0:
+                text += f" ({moves_num})"
         else:
             text = "       Solved!"
         self.moves_text.text = text
@@ -48,6 +49,4 @@ class AppUI:
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:
             for element in self.elements:
-                if element['type'] == 'button' and element['rect'].collidepoint(event.pos):
-                    if element['callback']:
-                        element['callback']()
+                pass

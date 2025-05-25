@@ -6,6 +6,7 @@ class AppUI:
         self.display_size = display_size
         self.elements = []  # Lista przechowująca elementy UI
         self.moves_text = None
+        self.alg_selected_text = None
 
     def add_element(self, element):
         self.elements.append(element)
@@ -28,6 +29,11 @@ class AppUI:
         self.moves_text = create_text(px,py,"F   G, F', B ...",font_size=40) #placeholder text
         self.add_element(self.moves_text)
 
+    def create_selected_alg_text(self):
+        w,h = self.display_size
+        self.alg_selected_text = create_text(w*0.02, h*0.90, "Selected: ---", font_size=30)
+        self.add_element(self.alg_selected_text)
+
     def update_bottom_ui_panel(self,cube_alg: RubiksAlgorithm):
         moves_arr = cube_alg.get_upcoming_moves()
         moves_num = cube_alg.get_upcoming_move_num()
@@ -45,6 +51,9 @@ class AppUI:
         else:
             text = "       Solved!"
         self.moves_text.text = text
+
+    def update_alg_selected(self,cube_alg: RubiksAlgorithm):
+        self.alg_selected_text.text = "Selected: " + cube_alg.algorythm.value[0]
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:

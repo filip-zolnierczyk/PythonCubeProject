@@ -7,8 +7,8 @@ from rubiks_data import RubiksCube
 upcoming_move_num_display = 4
 
 class SolvingAlgorithms(Enum):
-    Kociemba = "kociemba",
-    LBL = "lbl",
+    Kociemba = "Kociemba (Biblioteka)",
+    LBL = "LBL (Layer by Layer)",
     Test = "test"
 
 class RubiksAlgorithm:

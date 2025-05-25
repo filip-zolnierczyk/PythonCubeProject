@@ -58,6 +58,7 @@ def init():
     display = (WINDOW_WIDTH, WINDOW_HEIGHT)
     ui = ui_file.AppUI(display)
     ui.create_bottom_ui_panel()
+    ui.create_selected_alg_text()
 
     # initialize cube data
     rubiks_data = RubiksCube()
@@ -66,6 +67,7 @@ def init():
     # initalize solver 
     rubiks_algorithm = RubiksAlgorithm()
     rubiks_algorithm.select_rubiks_algorythm(SolvingAlgorithms.Kociemba)
+    ui.update_alg_selected(rubiks_algorithm)
     rubiks_algorithm.run_rubiks_solver(rubiks_data.sides)
 
     # initalize cube display

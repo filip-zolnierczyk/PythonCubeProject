@@ -34,12 +34,12 @@ class AppUI:
 
         text = ""
         if len(moves_arr) != 0: 
-            text = moves_arr[0].value + "       "
+            text = moves_arr[0] + "       "
             for i in range(1,len(moves_arr)):
                 if i < len(moves_arr)-1:
-                    text += moves_arr[i].value + ", " 
+                    text += moves_arr[i] + ", " 
                 else:
-                    text += moves_arr[i].value + " ..."
+                    text += moves_arr[i] + " ..."
             if moves_num > 0:
                 text += f" ({moves_num})"
         else:

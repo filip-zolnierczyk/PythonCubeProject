@@ -99,12 +99,12 @@ def previous_side(x):
 
 
 def convert_move_to_face(move: string):
-    if move.value.find("F") != -1: return 'g'
-    if move.value.find("R") != -1: return 'o'
-    if move.value.find("B") != -1: return 'b'
-    if move.value.find("L") != -1: return 'r'
-    if move.value.find("U") != -1: return 'y'
-    if move.value.find("D") != -1: return 'w'
+    if move.find("F") != -1: return 'g'
+    if move.find("R") != -1: return 'o'
+    if move.find("B") != -1: return 'b'
+    if move.find("L") != -1: return 'r'
+    if move.find("U") != -1: return 'y'
+    if move.find("D") != -1: return 'w'
     return 'x'
 
 def shift_move_xyz(base_move, offset_x, offset_y, offset_z):

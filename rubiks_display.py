@@ -135,15 +135,20 @@ class RubiksCubeDisplay:
         self.rotation_animation_objects.clear()
     
     def animate_move(self, move: RubiksMove, duration: float):
-        base_move = move.value[0]
+        move_str = ""
+        if isinstance(move,RubiksMove): move_str = move.value
+        else: move_str = move.upper()
+
+        base_move = move_str[0]
+    
         if base_move in ["X","Y","Z"]: return
         
         self.is_coloured = False
-        v1,v2 = face_local_vectors[move.value]
+        v1,v2 = face_local_vectors[move_str]
         orientation_code = convert_move_to_face(move)
         orientation = code_to_orientation(orientation_code)
-        clockwise = not (move.value.find("'") != -1)
-        double = move.value.find("2") != -1
+        clockwise = not (move_str.find("'") != -1)
+        double = move_str.find("2") != -1
         rotation = 90 if clockwise else -90
         rotation = rotation*2 if double else rotation
         dp = calc_rotation_matrix_for_rubiks_side(v1, v2, self.square_num, self.mini_cubes[orientation.value].size, rotation)

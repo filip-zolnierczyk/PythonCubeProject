@@ -65,7 +65,7 @@ def init():
     
     # initalize solver 
     rubiks_algorythm = rubiks_algorythm_file.RubiksAlgorythm()
-    rubiks_algorythm.select_rubiks_algorythm("test") # "LBL" lub "test" (wiecej nie ma na razie)
+    rubiks_algorythm.select_rubiks_algorythm("lbl") # "LBL" lub "test" (wiecej nie ma na razie)
     rubiks_algorythm.run_rubiks_solver(rubiks_data.sides)
 
     # initalize cube display

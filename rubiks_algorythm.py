@@ -18,7 +18,7 @@ class RubiksAlgorythm:
         self.progress += 1
         if self.progress == len(self.move_sequence):
             self.solving = False
-        print(f"Performing move: {move.value}")
+        #print(f"Performing move: {move}")
         return move
 
     def is_solving(self):

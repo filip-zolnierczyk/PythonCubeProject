@@ -63,9 +63,12 @@ class RubiksCube:
             ]
         self.sides[side] = "".join(rotated_face)
 
-    def perform_move(self, move: RubiksMove):
-        # Mapowanie enum -> funkcja + kierunek
-        move_str = move.value
+    def perform_move(self, move):
+
+        move_str = ""
+        if isinstance(move,RubiksMove): move_str = move.value
+        else: move_str = move.upper()
+
         base_move = move_str[0]
         clockwise = True
         repeat = 1

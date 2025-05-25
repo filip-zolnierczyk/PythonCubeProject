@@ -6,44 +6,62 @@ import string
 
 from sympy import elliptic_f
 
+# class RubiksMove(Enum):
+#     # Główne ruchy 90° zgodnie z ruchem wskazówek zegara
+#     U = "U"  # Up
+#     D = "D"  # Down
+#     L = "L"  # Left
+#     R = "R"  # Right
+#     F = "F"  # Front
+#     B = "B"  # Back
 
-class RubiksMove(Enum):
-    # Główne ruchy 90° zgodnie z ruchem wskazówek zegara
-    U = "U"  # Up
-    D = "D"  # Down
-    L = "L"  # Left
-    R = "R"  # Right
-    F = "F"  # Front
-    B = "B"  # Back
+#     # Ruchy przeciwnie do ruchu wskazówek zegara (prime)
+#     U_PRIME = "U'"  # Up inverse
+#     D_PRIME = "D'"  # Down inverse
+#     L_PRIME = "L'"  # Left inverse
+#     R_PRIME = "R'"  # Right inverse
+#     F_PRIME = "F'"  # Front inverse
+#     B_PRIME = "B'"  # Back inverse
 
-    # Ruchy przeciwnie do ruchu wskazówek zegara (prime)
-    U_PRIME = "U'"  # Up inverse
-    D_PRIME = "D'"  # Down inverse
-    L_PRIME = "L'"  # Left inverse
-    R_PRIME = "R'"  # Right inverse
-    F_PRIME = "F'"  # Front inverse
-    B_PRIME = "B'"  # Back inverse
+#     # Ruchy o 180 stopni
+#     U2 = "U2"  # Up 180°
+#     D2 = "D2"  # Down 180°
+#     L2 = "L2"  # Left 180°
+#     R2 = "R2"  # Right 180°
+#     F2 = "F2"  # Front 180°
+#     B2 = "B2"  # Back 180°
 
-    # Ruchy o 180 stopni
-    U2 = "U2"  # Up 180°
-    D2 = "D2"  # Down 180°
-    L2 = "L2"  # Left 180°
-    R2 = "R2"  # Right 180°
-    F2 = "F2"  # Front 180°
-    B2 = "B2"  # Back 180°
+#     # Obrót całej kostki (rotacje globalne)
+#     X = "X"  # Rotacja wokół osi X (jak R)
+#     X_PRIME = "X'"
+#     X2 = "X2"
 
-    # Obrót całej kostki (rotacje globalne)
-    X = "X"  # Rotacja wokół osi X (jak R)
-    X_PRIME = "X'"
-    X2 = "X2"
+#     Y = "Y"  # Rotacja wokół osi Y (jak U)
+#     Y_PRIME = "Y'"
+#     Y2 = "Y2"
 
-    Y = "Y"  # Rotacja wokół osi Y (jak U)
-    Y_PRIME = "Y'"
-    Y2 = "Y2"
+#     Z = "Z"  # Rotacja wokół osi Z (jak F)
+#     Z_PRIME = "Z'"
+#     Z2 = "Z2"
 
-    Z = "Z"  # Rotacja wokół osi Z (jak F)
-    Z_PRIME = "Z'"
-    Z2 = "Z2"
+def is_valid_move(move: str) -> bool:
+    if len(move) == 0 or len(move) > 2: return False
+
+    base_move = move[0]
+    special = move[1] if len(move) == 2 else ""
+
+    corrent_base = base_move in ['F','B','R','L','U', 'D'] or base_move in ['X', 'Y', 'Z']
+    correct_special = len(move) == 1 or special in ["'", "2"]
+    return corrent_base and correct_special
+
+def is_double_move(move: str) -> bool:
+    return len(move) == 2 and move[1] == '2'
+
+def is_prime_move(move: str) -> bool:
+    return len(move) == 2 and move[1] == "'"
+
+def is_reposition_move(move: str) -> bool:
+    return len(move) == 1 and move in ["X","Y","Z"]
 
 def opposite_side(x):
     if x == "b":
@@ -133,26 +151,26 @@ def shift_move_xyz(base_move, offset_x, offset_y, offset_z):
 
     return base_move
 
-def code_to_move(code: string):
-    match code:
-        case "F": return RubiksMove.F
-        case "R": return RubiksMove.R
-        case "B": return RubiksMove.B
-        case "L": return RubiksMove.L
-        case "U": return RubiksMove.U
-        case "D": return RubiksMove.D
-        case "F'": return RubiksMove.F_PRIME
-        case "R'": return RubiksMove.R_PRIME
-        case "B'": return RubiksMove.B_PRIME
-        case "L'": return RubiksMove.L_PRIME
-        case "U'": return RubiksMove.U_PRIME
-        case "D'": return RubiksMove.D_PRIME
-        case "X": return RubiksMove.X
-        case "Y": return RubiksMove.Y
-        case "Z": return RubiksMove.Z
-        case "X'": return RubiksMove.X_PRIME
-        case "Y'": return RubiksMove.Y_PRIME
-        case "Z'": return RubiksMove.Z_PRIME
+# def code_to_move(code: string):
+#     match code:
+#         case "F": return RubiksMove.F
+#         case "R": return RubiksMove.R
+#         case "B": return RubiksMove.B
+#         case "L": return RubiksMove.L
+#         case "U": return RubiksMove.U
+#         case "D": return RubiksMove.D
+#         case "F'": return RubiksMove.F_PRIME
+#         case "R'": return RubiksMove.R_PRIME
+#         case "B'": return RubiksMove.B_PRIME
+#         case "L'": return RubiksMove.L_PRIME
+#         case "U'": return RubiksMove.U_PRIME
+#         case "D'": return RubiksMove.D_PRIME
+#         case "X": return RubiksMove.X
+#         case "Y": return RubiksMove.Y
+#         case "Z": return RubiksMove.Z
+#         case "X'": return RubiksMove.X_PRIME
+#         case "Y'": return RubiksMove.Y_PRIME
+#         case "Z'": return RubiksMove.Z_PRIME
 
 def convert_table_to_side(t):
     string = t[0] + t[3] + t[6] + t[1] + t[4] + t[7] + t[2] + t[5] + t[8]

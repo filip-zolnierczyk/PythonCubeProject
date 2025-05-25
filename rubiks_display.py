@@ -134,26 +134,40 @@ class RubiksCubeDisplay:
         self.position_animation_objects.clear()
         self.rotation_animation_objects.clear()
     
-    def animate_move(self, move: RubiksMove, duration: float):
-        move_str = ""
-        if isinstance(move,RubiksMove): move_str = move.value
-        else: move_str = move.upper()
-
+    def animate_move(self, move: string, duration: float):
+        move_str = move.upper()
         base_move = move_str[0]
     
-        if base_move in ["X","Y","Z"]: return
-        
         self.is_coloured = False
-        v1,v2 = face_local_vectors[move_str]
-        orientation_code = convert_move_to_face(move)
-        orientation = code_to_orientation(orientation_code)
-        clockwise = not (move_str.find("'") != -1)
-        double = move_str.find("2") != -1
-        rotation = 90 if clockwise else -90
-        rotation = rotation*2 if double else rotation
-        dp = calc_rotation_matrix_for_rubiks_side(v1, v2, self.square_num, self.mini_cubes[orientation.value].size, rotation)
 
+        # move info
+        orientation_code = convert_move_to_face(move_str)
+        orientation = code_to_orientation(orientation_code)
+        clockwise = not (is_prime_move(move_str))
+        double = is_double_move(move_str)
+
+        # reposition moves special case
+        if is_reposition_move(move_str): # just wait and do nothing, reposition move is X,Y or Z
+            self.rotation_animation_objects.append( (self.sides[orientation.value][0],Animation(duration, 0, 0, reset_value=0)) )
+        
+        # calculate animation params
+        rotation = 90 if clockwise else -90
+        if double: rotation *= 2; duration *= 1.75
+
+        v1,v2 = face_local_vectors[move_str if not double else base_move] # double has same vectors and normal
+        dp = calc_rotation_matrix_for_rubiks_side(v1, v2, self.square_num, self.mini_cubes[orientation.value].size, rotation)
+        dp2 = [] if not double else calc_rotation_matrix_for_rubiks_side(v1, v2, self.square_num, self.mini_cubes[orientation.value].size, rotation//2)
+
+        # apply position and rotation animations
         for i,mini in enumerate(self.sides[orientation.value]):
-            self.position_animation_objects.append( (mini,Animation(duration, mini.origin, mini.origin + dp[i//self.square_num][i%self.square_num], reset_value=mini.origin)) )
-            self.rotation_animation_objects.append( (mini,Animation(duration, 0, rotation, reset_value=0)) )
+            pos_anim = Animation(duration, mini.origin, mini.origin + dp[i//self.square_num][i%self.square_num], reset_value=mini.origin)
+            rot_anim = Animation(duration, 0, rotation, reset_value=0)
+        
+            if double:
+                pos_anim.add_animation_mid_steps(0.5, mini.origin + dp2[i//self.square_num][i%self.square_num])
+                rot_anim.add_animation_mid_steps(0.5, rotation // 2)
+
+            self.position_animation_objects.append( (mini, pos_anim) )
+            self.rotation_animation_objects.append( (mini, rot_anim) )
+
             mini.rotation_vector = -v1.cross(v2)

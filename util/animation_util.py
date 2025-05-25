@@ -4,10 +4,19 @@ class Animation:
     def __init__(self, duration, start_value, end_value, easing_function=None, reset_value=None):
         self.duration = duration
         self.time = 0
-        self.start_value = start_value
-        self.end_value = end_value
+
+        self.current_animation_step = 1
+        self.last_animation_step_t = 0.0
+        self.next_animation_step_t = 1.0
+
+        self.animation_timeline = [(0.0,start_value),(1.0,end_value)]
         self.easing_function = easing_function if easing_function else ease_in_out
         self.reset_value = reset_value
+
+    def add_animation_mid_steps(self, t: float, value: float):
+        self.animation_timeline.append( (t,value) )
+        self.animation_timeline.sort(key = lambda x : x[0]) # sortujemy po parametrze t w krokach animacji
+        self.next_animation_step_t = min(self.next_animation_step_t, t) #assume animation not started yet
 
     def is_animating(self,dt):
         self.time += dt
@@ -16,7 +25,16 @@ class Animation:
     def get_animation_value(self):
         t = self.time / self.duration
         eased_t = self.easing_function(t)
-        return self.start_value + (self.end_value - self.start_value) * eased_t
+
+        if self.current_animation_step < len(self.animation_timeline)-1 and eased_t >= self.next_animation_step_t:
+            self.current_animation_step += 1
+            self.last_animation_step_t = self.next_animation_step_t
+            self.next_animation_step_t = self.animation_timeline[self.current_animation_step][0]
+
+        last_t, origin_value = self.animation_timeline[self.current_animation_step - 1]
+        target_t, target_value = self.animation_timeline[self.current_animation_step]
+        step_t = (eased_t-last_t) / (target_t - last_t)
+        return origin_value + (target_value - origin_value) * step_t
     
     def get_reset_value(self):
         return self.reset_value

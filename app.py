@@ -3,12 +3,12 @@ from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 from OpenGL.GLUT import *
-import rubiks_data as rubiks_data_file
-import rubiks_display as rubiks_display_file
-import rubiks_algorythm as rubiks_algorythm_file
+from rubiks_data import RubiksCube
+from rubiks_display import RubiksCubeDisplay
+from solving_algorithms.rubiks_algorithm import RubiksAlgorithm, SolvingAlgorithms
 from util.vector_util import V3_ZERO
 from util.animation_util import *
-import app_ui
+import ui as ui_file
 
 """ 
     green - front
@@ -25,13 +25,13 @@ rotation_angle_y = 0.0
 clock = None
 rubiks_display = None
 rubiks_data = None
-rubiks_algorythm = None
+rubiks_algorithm = None
 running = True
 ui = None
 display = None
 
 def init():
-    global clock, rubiks_data, rubiks_display, rotation_angle_x, rotation_angle_y, rubiks_algorythm, view_angle_anim_x, view_angle_anim_y, pause_solver, ui, display
+    global clock, rubiks_data, rubiks_display, rotation_angle_x, rotation_angle_y, rubiks_algorithm, view_angle_anim_x, view_angle_anim_y, pause_solver, ui, display
 
     # init pygame window
     WINDOW_WIDTH = 1200
@@ -56,23 +56,23 @@ def init():
     view_angle_anim_y = None
     pause_solver = False
     display = (WINDOW_WIDTH, WINDOW_HEIGHT)
-    ui = app_ui.AppUI(display)
+    ui = ui_file.AppUI(display)
     ui.create_bottom_ui_panel()
 
     # initialize cube data
-    rubiks_data = rubiks_data_file.RubiksCube()
+    rubiks_data = RubiksCube()
     rubiks_data.scramble_cube()
     
     # initalize solver 
-    rubiks_algorythm = rubiks_algorythm_file.RubiksAlgorythm()
-    rubiks_algorythm.select_rubiks_algorythm("lbl") # "LBL" lub "test" (wiecej nie ma na razie)
-    rubiks_algorythm.run_rubiks_solver(rubiks_data.sides)
+    rubiks_algorithm = RubiksAlgorithm()
+    rubiks_algorithm.select_rubiks_algorythm(SolvingAlgorithms.Kociemba)
+    rubiks_algorithm.run_rubiks_solver(rubiks_data.sides)
 
     # initalize cube display
-    rubiks_display = rubiks_display_file.RubiksCubeDisplay(3, V3(0,0,0), 0.8, rubiks_data.sides)
+    rubiks_display = RubiksCubeDisplay(3, V3(0,0,0), 0.8, rubiks_data.sides)
 
 def loop(dt):
-    global rubiks_data, rubiks_display, rotation_angle_x, rubiks_algorythm, view_angle_anim_x, pause_solver, ui, display
+    global rubiks_data, rubiks_display, rotation_angle_x, rubiks_algorithm, view_angle_anim_x, pause_solver, ui, display
 
 
     # animacja zmiany widoku kostki (strzalki <- i -> )
@@ -92,9 +92,9 @@ def loop(dt):
 
         # nowy ruch kostki
         if not pause_solver:
-            if rubiks_algorythm.is_solving():
-                ui.update_bottom_ui_panel(rubiks_algorythm)
-                move = rubiks_algorythm.get_next_move()
+            if rubiks_algorithm.is_solving():
+                ui.update_bottom_ui_panel(rubiks_algorithm)
+                move = rubiks_algorithm.get_next_move()
                 rubiks_data.perform_move(move)            
                 rubiks_display.animate_move(move, 0.8)
 

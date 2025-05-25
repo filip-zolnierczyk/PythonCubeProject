@@ -25,14 +25,7 @@ class RubiksCube:
         return self.performed_moves
 
     def scramble_cube(self):
-        scramble_moves = [
-            RubiksMove.F, #RubiksMove.F_PRIME,
-            RubiksMove.R, #RubiksMove.R_PRIME,
-            RubiksMove.B, #RubiksMove.B_PRIME,
-            RubiksMove.L, #RubiksMove.L_PRIME,
-            RubiksMove.U, #RubiksMove.U_PRIME,
-            RubiksMove.D, #RubiksMove.D_PRIME,
-        ]
+        scramble_moves = [ "F", "R", 'B', 'L', 'U', 'D' ]
 
         for i in range(2):
             shuffle(scramble_moves)
@@ -64,11 +57,7 @@ class RubiksCube:
         self.sides[side] = "".join(rotated_face)
 
     def perform_move(self, move):
-
-        move_str = ""
-        if isinstance(move,RubiksMove): move_str = move.value
-        else: move_str = move.upper()
-
+        move_str = move.upper()
         base_move = move_str[0]
         clockwise = True
         repeat = 1

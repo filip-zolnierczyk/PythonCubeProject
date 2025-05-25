@@ -1,5 +1,5 @@
 from rubiks_data import RubiksCube
-from lbl_algorythms import *
+from LBL_Algorythm import *
 
 
 def solve_lbl(cube=RubiksCube()):

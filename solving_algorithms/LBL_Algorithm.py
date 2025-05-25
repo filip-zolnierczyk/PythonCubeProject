@@ -1,5 +1,21 @@
 from util.rubiks_move_util import next_side, previous_side, opposite_side
+from rubiks_data import RubiksCube
 
+def solve_lbl(state):
+    cube = RubiksCube(state)
+    cube.clear_performed_moves()
+
+    white_cross(cube)
+    insert_bottom_corners(cube)
+    insert_edges(cube)
+    yellow_cross(cube)
+    allign_top_edges(cube)
+    position_top_corners(cube)
+    permutate_top_corners(cube)
+    last_move(cube)
+
+    moves = cube.get_performed_moves()
+    return moves
 
 def corner_insert_right(cube):
     cube.perform_r_move()

@@ -20,7 +20,7 @@ from video_capture import get_cube_by_video
     white - bottom
 """
 
-MOVE_DURATION = 0.2
+MOVE_DURATION = 0.6
 
 # zmienne globalne
 rotation_angle_x = 0.0
@@ -126,16 +126,14 @@ def main():
             # button inputs
             if (event.type == KEYDOWN):
                 # change view
-                if (event.key == K_LEFT):
+                if event.key == K_LEFT:
                     view_angle_anim_x = Animation(VIEW_CHANGE_DURATION,rotation_angle_x,rotation_angle_x+VIEW_CHANGE_AMOUNT)
-                if (event.key == K_RIGHT):
+                if event.key == K_RIGHT:
                     view_angle_anim_x = Animation(VIEW_CHANGE_DURATION,rotation_angle_x,rotation_angle_x-VIEW_CHANGE_AMOUNT)
 
                 # pause solver
-                if (event.type == KEYDOWN and event.key == K_SPACE):
+                if event.key == K_SPACE:
                     pause_solver = not pause_solver
-                if (event.type == KEYDOWN and event.key == K_p):
-                    pause_solver = False
                 
                 # select alg
                 alg_changed = None
@@ -158,7 +156,9 @@ def main():
                 if event.key == K_i:
                     print("Image Import not implemented yet!")
                 elif event.key == K_c: 
-                    get_cube_by_video()
+                    img_import_sides = get_cube_by_video()
+                    if img_import_sides is not None:
+                        rubiks_data.set_colours(img_import_sides)
 
             ui.handle_event(event)
 

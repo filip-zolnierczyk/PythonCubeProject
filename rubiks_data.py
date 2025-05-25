@@ -18,6 +18,9 @@ class RubiksCube:
         self.global_rotation_y = 0
         self.global_rotation_z = 0
 
+    def set_colours(self, colours: dict):
+        self.sides = colours
+        self.performed_moves = []
 
     def clear_performed_moves(self):
         self.performed_moves = []

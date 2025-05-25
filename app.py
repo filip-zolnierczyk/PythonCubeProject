@@ -62,7 +62,7 @@ def init():
 
     # initialize cube data
     rubiks_data = RubiksCube()
-    rubiks_data.scramble_cube()
+    #rubiks_data.scramble_cube()
     
     # initalize solver 
     rubiks_algorithm = RubiksAlgorithm()
@@ -103,7 +103,7 @@ def loop(dt):
     rubiks_display.draw()  # Rysowanie kostki Rubika
         
 def main():
-    global clock, rotation_angle_x, rotation_angle_y, view_angle_anim_x, view_angle_anim_y, pause_solver, ui, display
+    global clock, rotation_angle_x, rotation_angle_y, view_angle_anim_x, view_angle_anim_y, pause_solver, ui, display, rubiks_algorithm, rubiks_data
 
     init()
 
@@ -120,12 +120,37 @@ def main():
             VIEW_CHANGE_DURATION = 1.25
             VIEW_CHANGE_AMOUNT = 90
 
-            if (event.type == KEYDOWN and event.key == K_LEFT):
-                view_angle_anim_x = Animation(VIEW_CHANGE_DURATION,rotation_angle_x,rotation_angle_x+VIEW_CHANGE_AMOUNT)
-            if (event.type == KEYDOWN and event.key == K_RIGHT):
-                view_angle_anim_x = Animation(VIEW_CHANGE_DURATION,rotation_angle_x,rotation_angle_x-VIEW_CHANGE_AMOUNT)
-            if (event.type == KEYDOWN and event.key == K_SPACE):
-                pause_solver = not pause_solver
+            # button inputs
+            if (event.type == KEYDOWN):
+                # change view
+                if (event.key == K_LEFT):
+                    view_angle_anim_x = Animation(VIEW_CHANGE_DURATION,rotation_angle_x,rotation_angle_x+VIEW_CHANGE_AMOUNT)
+                if (event.key == K_RIGHT):
+                    view_angle_anim_x = Animation(VIEW_CHANGE_DURATION,rotation_angle_x,rotation_angle_x-VIEW_CHANGE_AMOUNT)
+
+                # pause solver
+                if (event.type == KEYDOWN and event.key == K_SPACE):
+                    pause_solver = not pause_solver
+                if (event.type == KEYDOWN and event.key == K_p):
+                    pause_solver = False
+                
+                # select alg
+                alg_changed = None
+                if   event.key == K_1:  alg_changed = SolvingAlgorithms.LBL
+                elif event.key == K_2:  alg_changed = SolvingAlgorithms.Kociemba
+                elif event.key == K_8:  alg_changed = SolvingAlgorithms.Test
+                elif event.key == K_9:  alg_changed = SolvingAlgorithms.Scramble
+
+                if alg_changed is not None:
+                    rubiks_algorithm.select_rubiks_algorythm(alg_changed)
+                    rubiks_algorithm.run_rubiks_solver(rubiks_data.sides)
+                    ui.update_alg_selected(rubiks_algorithm)
+                    ui.update_bottom_ui_panel(rubiks_algorithm)
+                    pause_solver = True
+
+                # other
+                if (event.key == K_s):
+                    rubiks_data.scramble_cube()
 
             ui.handle_event(event)
 

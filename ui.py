@@ -53,7 +53,7 @@ class AppUI:
         self.moves_text.text = text
 
     def update_alg_selected(self,cube_alg: RubiksAlgorithm):
-        self.alg_selected_text.text = "Selected: " + cube_alg.algorythm.value[0]
+        self.alg_selected_text.text = "Selected: " + cube_alg.algorythm.value
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:

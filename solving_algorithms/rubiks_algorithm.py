@@ -1,5 +1,5 @@
 from util.rubiks_move_util import *
-from random import randint
+import random
 from solving_algorithms.LBL_Algorithm import *
 from solving_algorithms.Kociemba_Algorithm import *
 from rubiks_data import RubiksCube
@@ -7,9 +7,10 @@ from rubiks_data import RubiksCube
 upcoming_move_num_display = 4
 
 class SolvingAlgorithms(Enum):
-    Kociemba = "Kociemba (Biblioteka)",
-    LBL = "LBL (Layer by Layer)",
+    Kociemba = "Kociemba (Biblioteka)"
+    LBL = "LBL (Layer by Layer)"
     Test = "test"
+    Scramble = "Scrambling ..." 
 
 class RubiksAlgorithm:
     def __init__(self, algorythm: SolvingAlgorithms = SolvingAlgorithms.Test):
@@ -40,9 +41,12 @@ class RubiksAlgorithm:
 
     def select_rubiks_algorythm(self, alg: SolvingAlgorithms):
         self.algorythm = alg
+        self.solving = False
+        self.move_sequence = []
 
     def run_rubiks_solver(self, rubiks_state: dict):
         self.solving = True
+        self.progress = 0
 
         print(f"Solving with algorythm: {self.algorythm}")
 
@@ -53,5 +57,19 @@ class RubiksAlgorithm:
                 self.move_sequence = solve_kociemba(rubiks_state)
             case SolvingAlgorithms.Test:
                 self.move_sequence = [ "F", "R", 'B', 'L', 'U', 'D' ]
+            case SolvingAlgorithms.Scramble:
+                faces = ['U', 'D', 'L', 'R', 'F', 'B']
+                modifiers = ['', "'", '2']
+                scramble = []
+                prev_face = None
+
+                for _ in range(25):
+                    face = random.choice(faces)
+                    while face == prev_face: face = random.choice(faces) # unikaj powtorzen scian
+                    move = face + random.choice(modifiers)
+                    scramble.append(move)
+                    prev_face = face
+
+                self.move_sequence = scramble
             case _: 
                 return ValueError("Solving for invalid algorythm name: !" + self.algorythm)

@@ -75,5 +75,3 @@ def get_cube_by_video():
             print(tab)
     cap.release()
     cv2.destroyAllWindows()
-
-get_cube_by_video()

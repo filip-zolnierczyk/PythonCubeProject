@@ -140,16 +140,17 @@ class RubiksCubeDisplay:
     
         self.is_coloured = False
 
+        # reposition moves special case
+        if is_reposition_move(move_str): # just wait and do nothing, reposition move is X,Y or Z
+            self.rotation_animation_objects.append( (self.sides[0][0],Animation(duration, 0, 0, reset_value=0)) )
+            return
+        
         # move info
         orientation_code = convert_move_to_face(move_str)
         orientation = code_to_orientation(orientation_code)
         clockwise = not (is_prime_move(move_str))
         double = is_double_move(move_str)
 
-        # reposition moves special case
-        if is_reposition_move(move_str): # just wait and do nothing, reposition move is X,Y or Z
-            self.rotation_animation_objects.append( (self.sides[orientation.value][0],Animation(duration, 0, 0, reset_value=0)) )
-        
         # calculate animation params
         rotation = 90 if clockwise else -90
         if double: rotation *= 2; duration *= 1.75

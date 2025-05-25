@@ -1,6 +1,8 @@
 from util.ui_util import *
 from solving_algorithms.rubiks_algorithm import RubiksAlgorithm
 
+info_blue = (71/255,116/255,173/255)
+
 class AppUI:
     def __init__(self, display_size):
         self.display_size = display_size
@@ -16,44 +18,115 @@ class AppUI:
         for element in self.elements:
             element.draw(self.display_size)
     
-    def create_bottom_ui_panel(self):
-        w,h = self.display_size
-        
-        img_w = 1500
-        img_h = 383
-        width = 0.6*w
-        px,py,pw,ph = (w-width)/2, (h-width*img_h/img_w), width, width*img_h/img_w
-        self.add_element(create_img(px,py,pw,ph,"images/test_img.png"))
-        
-        px,py = w*0.49, width*img_h/img_w/6
-        self.moves_text = create_text(px,py,"F   G, F', B ...",font_size=40) #placeholder text
-        self.add_element(self.moves_text)
+    def create_all_ui_elements(self):
+        self.create_left_info_panel()
+        self.create_right_info_panel()
 
-    def create_selected_alg_text(self):
+    def create_left_info_panel(self):
+        # basic data
         w,h = self.display_size
-        self.alg_selected_text = create_text(w*0.02, h*0.90, "Selected: ---", font_size=30)
+        panel_width = w*0.25
+        self.play_pause_minipanels = []
+        fill_mult = 0.65
+        currentHeight = 0
+
+        # algorithm select minipanel init
+        alg_select_height = 51/101*h*fill_mult
+        alg_select_minipanel = create_img(0,currentHeight,panel_width,alg_select_height,"images/algs_img.png")
+        self.alg_selected_text = create_text(w*0.03, h*0.88, "---", font_size=25, bg_colour=info_blue)
+        currentHeight += alg_select_height
+
+        # play pause minipanel init
+        play_pause_height = 25/101*h*fill_mult
+        pause_minipanel = create_img(0,currentHeight,panel_width,play_pause_height,"images/pause_img.png")
+        play_minipanel  = create_img(0,currentHeight,panel_width,play_pause_height,"images/playing_img.png")
+        self.play_pause_minipanels = [play_minipanel, pause_minipanel]
+        currentHeight += play_pause_height
+
+        # moves display minipanel init
+        moves_height = 24/101*h*fill_mult
+        moves_minipanel = create_img(0,currentHeight,panel_width,moves_height,"images/moves_img.png")
+        self.moves_text = create_text(panel_width*0.125,currentHeight-moves_height*0.7,"F      G, F', B ...",font_size=25) #placeholder text
+        currentHeight += moves_height
+
+        # left bg panel
+        left_info_panel = create_panel(0,0,panel_width,h,colour=info_blue, border_colour=(0,0,0), border_width=w*0.01, )
+
+        # add elements
+        self.add_element(alg_select_minipanel)
         self.add_element(self.alg_selected_text)
+        self.add_element(self.play_pause_minipanels[0])
+        self.add_element(self.play_pause_minipanels[1])
+        self.add_element(moves_minipanel)
+        self.add_element(self.moves_text)
+        self.add_element(left_info_panel)
 
-    def update_bottom_ui_panel(self,cube_alg: RubiksAlgorithm):
-        moves_arr = cube_alg.get_upcoming_moves()
-        moves_num = cube_alg.get_upcoming_move_num()
+    def update_ui_elements(self, rubiks_alg: RubiksAlgorithm, is_playing: bool, target_full = True):
+        if self.alg_selected_text is not None:
+            self.alg_selected_text.text = rubiks_alg.algorythm.value
 
-        text = ""
-        if len(moves_arr) != 0: 
-            text = moves_arr[0] + "       "
-            for i in range(1,len(moves_arr)):
-                if i < len(moves_arr)-1:
-                    text += moves_arr[i] + ", " 
-                else:
-                    text += moves_arr[i] + " ..."
-            if moves_num > 0:
-                text += f" ({moves_num})"
-        else:
-            text = "       Solved!"
-        self.moves_text.text = text
+        if len(self.play_pause_minipanels) == 2:
+            self.play_pause_minipanels[0].set_visible(is_playing)
+            self.play_pause_minipanels[1].set_visible(not is_playing)
+        if len(self.target_select_minipanels) == 2:
+            self.target_select_minipanels[0].set_visible(target_full)
+            self.target_select_minipanels[1].set_visible(not target_full)
 
-    def update_alg_selected(self,cube_alg: RubiksAlgorithm):
-        self.alg_selected_text.text = "Selected: " + cube_alg.algorythm.value
+        moves_arr = rubiks_alg.get_upcoming_moves()
+        moves_num = rubiks_alg.get_upcoming_move_num()
+
+        if self.moves_text is not None:
+            text = ""
+            if len(moves_arr) != 0: 
+                text = moves_arr[0] + "     "
+                for i in range(1,len(moves_arr)):
+                    if i < len(moves_arr)-1:
+                        text += moves_arr[i] + ", " 
+                    else:
+                        text += moves_arr[i] + " ..."
+                if moves_num > 0:
+                    text += f" ({moves_num})"
+            else:
+                text = "        Solved!"
+            self.moves_text.text = text
+
+    def create_right_info_panel(self):
+        # basic data
+        w,h = self.display_size
+        panel_width = w*0.25
+        panel_start = w*0.75
+        fill_mult = 0.75
+        currentHeight = 0
+
+        # target minipanel init
+        target_select_height = 32/118*h*fill_mult
+        target_full_minipanel = create_img(panel_start,currentHeight,panel_width,target_select_height,"images/target_full_img.png")
+        target_custom_minipanel = create_img(panel_start,currentHeight,panel_width,target_select_height,"images/target_custom_img.png")
+        self.target_select_minipanels = [target_full_minipanel, target_custom_minipanel]
+        currentHeight += target_select_height
+
+        # rubiks image preview minipanel init
+        img_preview_height = 40/118*h*fill_mult
+        img_preview_minipanel  = create_img(panel_start,currentHeight,panel_width,img_preview_height,"images/img9_img.png")
+        currentHeight += img_preview_height
+
+        # camera and image import display minipanel init
+        cam_import_height = 25/118*h*fill_mult
+        img_import_minipanel = create_img(panel_start,currentHeight,panel_width,cam_import_height,"images/img_import_img.png")
+        currentHeight += cam_import_height
+        cam_import_minipanel = create_img(panel_start,currentHeight,panel_width,cam_import_height,"images/camera_import_img.png")
+        currentHeight += cam_import_height
+
+        # right bg panel
+        right_info_panel = create_panel(panel_start,0,panel_width,h,colour=info_blue, border_colour=(0,0,0), border_width=w*0.01, )
+
+        # add elements
+        self.add_element(self.target_select_minipanels[0])
+        self.add_element(self.target_select_minipanels[1])
+        self.add_element(img_preview_minipanel)
+        self.add_element(cam_import_minipanel)
+        self.add_element(img_import_minipanel)
+        self.add_element(right_info_panel)
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN:

@@ -9,6 +9,9 @@ class UIElement:
         self.height = height
         self.visible = True
 
+    def set_visible(self, val: bool):
+        self.visible = val
+
     def draw(self, display_size):
         pass
 
@@ -16,10 +19,10 @@ class UIElement:
         pass
 
 class Panel(UIElement):
-    def __init__(self, x, y, width, height, color=(0.17,0.17,0.17), border_color=None, border_width=0, radius=0):
+    def __init__(self, x, y, width, height, colour=(0.17,0.17,0.17), border_colour=None, border_width=0, radius=0):
         super().__init__(x, y, width, height)
-        self.color = color
-        self.border_color = border_color
+        self.colour = colour
+        self.border_color = border_colour
         self.border_width = border_width
         self.radius = radius
 
@@ -38,7 +41,7 @@ class Panel(UIElement):
         glPushMatrix()
         glLoadIdentity()
 
-        glColor3f(*self.color)
+        glColor3f(*self.colour)
         glBegin(GL_QUADS)
         glVertex2f(self.x, self.y)
         glVertex2f(self.x + self.width, self.y)
@@ -79,21 +82,23 @@ class Button(Panel):
                     self.callback()
 
 class Text(UIElement):
-    def __init__(self, x, y, text, font_size=16, color=(255, 255, 255)):
+    def __init__(self, x, y, text, font_size=16, color=(255, 255, 255), bg_colour=None):
         super().__init__(x, y, 0, 0)
         self.x = x
         self.y = y
         self.text = text
         self.color = color
         self.font_size = font_size  # Placeholder, font rendering requires extra setup
+        self.bg_color = bg_colour  # New: background color (tuple or None)
 
     def draw(self, display_size=None):
         font = pygame.font.Font(pygame.font.get_default_font(), self.font_size)
-        text_surface = font.render(self.text, True, self.color).convert_alpha()
+        text_surface = font.render(self.text, True, self.color, self.bg_color)
+        text_surface = text_surface.convert_alpha()
         text_data = pygame.image.tostring(text_surface, "RGBA", True)
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-        glWindowPos2f(self.x,self.y)
+        glWindowPos2f(self.x, self.y)
         glDrawPixels(text_surface.get_width(), text_surface.get_height(), GL_RGBA, GL_UNSIGNED_BYTE, text_data)
 
 class Image(UIElement):
@@ -125,7 +130,7 @@ class Image(UIElement):
 
         x, y, w, h = self.x, self.y, self.width, self.height
         screen_w, screen_h = display_size
-
+    
         glEnable(GL_TEXTURE_2D)
         glEnable(GL_BLEND)
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)

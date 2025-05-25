@@ -9,6 +9,7 @@ from solving_algorithms.rubiks_algorithm import RubiksAlgorithm, SolvingAlgorith
 from util.vector_util import V3_ZERO
 from util.animation_util import *
 import ui as ui_file
+from video_capture import get_cube_by_video
 
 """ 
     green - front
@@ -18,6 +19,8 @@ import ui as ui_file
     yellow - top
     white - bottom
 """
+
+MOVE_DURATION = 0.2
 
 # zmienne globalne
 rotation_angle_x = 0.0
@@ -57,8 +60,7 @@ def init():
     pause_solver = False
     display = (WINDOW_WIDTH, WINDOW_HEIGHT)
     ui = ui_file.AppUI(display)
-    ui.create_bottom_ui_panel()
-    ui.create_selected_alg_text()
+    ui.create_all_ui_elements()
 
     # initialize cube data
     rubiks_data = RubiksCube()
@@ -67,7 +69,7 @@ def init():
     # initalize solver 
     rubiks_algorithm = RubiksAlgorithm()
     rubiks_algorithm.select_rubiks_algorythm(SolvingAlgorithms.Kociemba)
-    ui.update_alg_selected(rubiks_algorithm)
+    ui.update_ui_elements(rubiks_algorithm, pause_solver)
     rubiks_algorithm.run_rubiks_solver(rubiks_data.sides)
 
     # initalize cube display
@@ -95,10 +97,11 @@ def loop(dt):
         # nowy ruch kostki
         if not pause_solver:
             if rubiks_algorithm.is_solving():
-                ui.update_bottom_ui_panel(rubiks_algorithm)
                 move = rubiks_algorithm.get_next_move()
                 rubiks_data.perform_move(move)            
-                rubiks_display.animate_move(move, 0.8)
+                rubiks_display.animate_move(move, MOVE_DURATION)
+        
+        ui.update_ui_elements(rubiks_algorithm, not pause_solver)
 
     rubiks_display.draw()  # Rysowanie kostki Rubika
         
@@ -144,13 +147,18 @@ def main():
                 if alg_changed is not None:
                     rubiks_algorithm.select_rubiks_algorythm(alg_changed)
                     rubiks_algorithm.run_rubiks_solver(rubiks_data.sides)
-                    ui.update_alg_selected(rubiks_algorithm)
-                    ui.update_bottom_ui_panel(rubiks_algorithm)
+                    ui.update_ui_elements(rubiks_algorithm, not pause_solver)
                     pause_solver = True
 
                 # other
                 if (event.key == K_s):
                     rubiks_data.scramble_cube()
+
+                # data imports
+                if event.key == K_i:
+                    print("Image Import not implemented yet!")
+                elif event.key == K_c: 
+                    get_cube_by_video()
 
             ui.handle_event(event)
 

@@ -61,7 +61,7 @@ def is_prime_move(move: str) -> bool:
     return len(move) == 2 and move[1] == "'"
 
 def is_reposition_move(move: str) -> bool:
-    return len(move) == 1 and move in ["X","Y","Z"]
+    return len(move) > 0 and move[0] in ["X","Y","Z"]
 
 def opposite_side(x):
     if x == "b":

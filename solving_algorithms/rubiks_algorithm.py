@@ -4,13 +4,13 @@ from solving_algorithms.LBL_Algorithm import *
 from solving_algorithms.Kociemba_Algorithm import *
 from rubiks_data import RubiksCube
 
-upcoming_move_num_display = 4
+upcoming_move_num_display = 3
 
 class SolvingAlgorithms(Enum):
-    Kociemba = "Kociemba (Biblioteka)"
-    LBL = "LBL (Layer by Layer)"
+    Kociemba = "Kociemba"
+    LBL = "LBL"
     Test = "test"
-    Scramble = "Scrambling ..." 
+    Scramble = "Scramble" 
 
 class RubiksAlgorithm:
     def __init__(self, algorythm: SolvingAlgorithms = SolvingAlgorithms.Test):
@@ -33,7 +33,7 @@ class RubiksAlgorithm:
 
     def get_upcoming_moves(self, move_num=upcoming_move_num_display) -> list:
         if self.move_sequence == None or len(self.move_sequence) == 0: return []
-        return self.move_sequence[self.progress:min(len(self.move_sequence)-1,self.progress+move_num)]
+        return self.move_sequence[max(0,self.progress-1):min(len(self.move_sequence)-1,self.progress+move_num)]
 
     def get_upcoming_move_num(self) -> int:
         if self.move_sequence == None: return 0

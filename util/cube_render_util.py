@@ -4,7 +4,6 @@ from OpenGL.GLUT import *
 
 from util.vector_util import mul_vector, add_vectors, V3_ZERO
 from util.colour_util import COLOR_MAP
-from util.orientation_util import code_to_orientation
 
 # Wierzchołki kostki (znormalizowane -> dlugosc boku = 1)
 vertices = [

@@ -10,6 +10,7 @@ from util.vector_util import V3_ZERO
 from util.animation_util import *
 import ui as ui_file
 from video_capture import get_cube_by_video
+from imgage_data_import import get_imported_img_colour_data
 
 """ 
     green - front
@@ -163,7 +164,13 @@ def main():
 
                 # data imports
                 if event.key == K_i:
-                    print("Image Import not implemented yet!")
+                    img_col_data = get_imported_img_colour_data()
+                    ui.set_custom_target(img_col_data)
+                    pause_solver = True
+                    ui.select_custom_target_cube(1,1)
+                if event.key == K_o:
+                    ui.remove_custom_target()
+                    pause_solver = True
                 elif event.key == K_c: 
                     img_import_sides = get_cube_by_video()
                     if img_import_sides is not None:

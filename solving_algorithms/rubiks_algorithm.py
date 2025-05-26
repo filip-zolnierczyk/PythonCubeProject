@@ -11,6 +11,7 @@ class SolvingAlgorithms(Enum):
     LBL = "LBL"
     Test = "test"
     Scramble = "Scramble" 
+    A_STAR = "A*" 
 
 class RubiksAlgorithm:
     def __init__(self, algorythm: SolvingAlgorithms = SolvingAlgorithms.Test):

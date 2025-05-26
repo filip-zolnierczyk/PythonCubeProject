@@ -3,6 +3,7 @@ from solving_algorithms.rubiks_algorithm import RubiksAlgorithm
 from util.colour_util import preview_colour_map
 
 info_blue = (71/255,116/255,173/255)
+ERROR_DISPLAY_TIME = 4.0
 
 class AppUI:
     def __init__(self, display_size):
@@ -16,6 +17,11 @@ class AppUI:
         self.custom_target = False
 
         self.cube_size = 3
+
+        self.clock = pygame.time.Clock()
+        self.error_displayed = False
+        self.error_timer = 0
+        self.error_text = None
 
     def add_element(self, element, priority = 0):
         self.elements.append((element,priority))
@@ -94,6 +100,13 @@ class AppUI:
             else:
                 text = "        Solved!"
             self.moves_text.text = text
+
+        if self.error_displayed:
+            dt = self.clock.tick(60) / 1000
+            self.error_timer += dt
+            if self.error_timer > ERROR_DISPLAY_TIME:
+                self.error_displayed = False
+                self.error_text.set_visible(False)
 
     def create_right_info_panel(self):
         # basic data
@@ -175,8 +188,7 @@ class AppUI:
                 px = x_start + j*cell_w
                 py = y_start + i*cell_h
                 pnl = create_panel(px, py, cell_w*1.03, cell_h*1.03,
-                                   colour=preview_colour_map[colour_data[i][j]],
-                                   border_colour=(0,0,0), border_width=1)
+                                   colour=preview_colour_map[colour_data[i][j]])
                 self.add_element(pnl, 1)
                 row_panels.append(pnl)
             self.target_preview_cubes.append(row_panels)
@@ -197,7 +209,20 @@ class AppUI:
                 if (i//self.cube_size,j//self.cube_size)==self.selected:
                     pnl.colour = preview_colour_map[self.preview_colour_data[i][j]]
                 else:
-                    pnl.colour = colour_mult(preview_colour_map[self.preview_colour_data[i][j]], 0.4)
+                    pnl.colour = colour_mult(preview_colour_map[self.preview_colour_data[i][j]], 0.25)
+
+    def print_onscreen_error(self, err: str):
+        print("ERROR: " + err)
+        w, h = self.display_size
+
+        if self.error_text is None:
+            self.error_text = create_text(w*0.3,h*0.9,err,colour=(255,0,0),font_size=15)
+            self.add_element(self.error_text)
+
+        self.error_displayed = True
+        self.error_timer = 0
+        self.error_text.text = "ERROR " + err
+        self.error_text.set_visible(True)
 
     def select_custom_target_cube(self, row, col):
         self.selected = (row, col)

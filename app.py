@@ -30,25 +30,35 @@ WINDOW_WIDTH = 1200
 WINDOW_HEIGHT = int(WINDOW_WIDTH * (9/16))
 
 # zmienne globalne
-rotation_angle_x = 0.0
-rotation_angle_y = 0.0
-clock = None
-rubiks_display = None
-rubiks_data = None
-rubiks_algorithm = None
-running = True
-ui = None
-display = None
+class Params:
+    def __init__(self):
+        self.rotation_angle_x = 0.0
+        self.rotation_angle_y = 0.0
+        self.clock = None
+        self.rubiks_display: RubiksCubeDisplay = None
+        self.rubiks_data: RubiksCube = None
+        self.rubiks_algorithm: RubiksAlgorithm = None
+        self.running = True
+        self.ui: ui_file.AppUI = None
+        self.display = None
+        self.stepping_mode = False
+        self.goto_next_step = False
+        self.view_angle_anim_x = 0
+        self.view_angle_anim_y = 0
+        self.pause_solver = False
+p: Params = None
 
 def init():
-    global clock, rubiks_data, rubiks_display, rotation_angle_x, rotation_angle_y, rubiks_algorithm, view_angle_anim_x, view_angle_anim_y, pause_solver, ui, display
+    global p
+
+    p = Params()
 
     # init pygame window
     pygame.init()
-    display = (WINDOW_WIDTH, WINDOW_HEIGHT)
-    pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
+    p.display = (WINDOW_WIDTH, WINDOW_HEIGHT)
+    pygame.display.set_mode(p.display, DOUBLEBUF | OPENGL)
     pygame.display.set_caption("Rubik's Cube")
-    
+
     # init opengl
     glutInit()
     glEnable(GL_DEPTH_TEST) 
@@ -58,74 +68,72 @@ def init():
     glRotatef(45, 1, 1, 0)
 
     # app data
-    clock = pygame.time.Clock()
-    rotation_angle_x = 0
-    view_angle_anim_x = None
-    view_angle_anim_y = None
-    pause_solver = True
-    display = (WINDOW_WIDTH, WINDOW_HEIGHT)
-    ui = ui_file.AppUI(display)
-    ui.create_all_ui_elements()
+    p.clock = pygame.time.Clock()
+    p.rotation_angle_x = 0
+    p.view_angle_anim_x = None
+    p.view_angle_anim_y = None
+    p.pause_solver = True
+    p.ui = ui_file.AppUI(p.display)
+    p.ui.create_all_ui_elements()
 
     # initialize cube data
-    rubiks_data = RubiksCube()
+    p.rubiks_data = RubiksCube()
     #rubiks_data.scramble_cube()
     
     # initalize solver 
-    rubiks_algorithm = RubiksAlgorithm()
-    rubiks_algorithm.select_rubiks_algorythm(SolvingAlgorithms.Scramble)
-    ui.update_ui_elements(rubiks_algorithm, pause_solver)
-    rubiks_algorithm.run_rubiks_solver(rubiks_data.sides)
+    p.rubiks_algorithm = RubiksAlgorithm()
+    p.rubiks_algorithm.select_rubiks_algorythm(SolvingAlgorithms.Scramble)
+    p.ui.update_ui_elements(p.rubiks_algorithm, p.pause_solver)
+    p.rubiks_algorithm.run_rubiks_solver(p.rubiks_data.sides)
 
     # initalize cube display
-    rubiks_display = RubiksCubeDisplay(3, V3(0,0,0), 0.8, rubiks_data.sides)
+    p.rubiks_display = RubiksCubeDisplay(3, V3(0,0,0), 0.8, p.rubiks_data.sides)
 
 def loop(dt):
-    global rubiks_data, rubiks_display, rotation_angle_x, rubiks_algorithm, view_angle_anim_x, pause_solver, ui, display
-
+    global p
 
     # animacja zmiany widoku kostki (strzalki <- i -> )
-    if view_angle_anim_x is not None and view_angle_anim_x.is_animating(dt):
-        rotation_angle_x = view_angle_anim_x.get_animation_value()
-    glRotatef(rotation_angle_x, 0, 1, 0)
+    if p.view_angle_anim_x is not None and p.view_angle_anim_x.is_animating(dt):
+        p.rotation_angle_x = p.view_angle_anim_x.get_animation_value()
+    glRotatef(p.rotation_angle_x, 0, 1, 0)
 
     # animacja ruchu scianki kostki
-    finished_anim = rubiks_display.update_animation(dt)
+    finished_anim = p.rubiks_display.update_animation(dt)
 
     # pobranie nowego ruchu z algorytmu do wyswietlenia 
     if finished_anim:
         # update kolorow z poprzedniego ruchu
-        if not rubiks_display.is_currently_coloured():
-            rubiks_display.reset_all_animations()
-            rubiks_display.set_all_colours(rubiks_data.sides)
+        if not p.rubiks_display.is_currently_coloured():
+            p.rubiks_display.reset_all_animations()
+            p.rubiks_display.set_all_colours(p.rubiks_data.sides)
 
         # nowy ruch kostki
-        if not pause_solver:
-            if rubiks_algorithm.is_solving():
-                move = rubiks_algorithm.get_next_move_transposed()
+        if not p.pause_solver:
+            if p.rubiks_algorithm.is_solving():
+                move = p.rubiks_algorithm.get_next_move_transposed()
                 move_viewport_x_with_move(move)
-                rubiks_data.perform_move(move)            
-                rubiks_display.animate_move(move, MOVE_DURATION)
+                p.rubiks_data.perform_move(move)            
+                p.rubiks_display.animate_move(move, MOVE_DURATION)
         
-        ui.update_ui_elements(rubiks_algorithm, not pause_solver)
+        p.ui.update_ui_elements(p.rubiks_algorithm, not p.pause_solver)
 
-    rubiks_display.draw()  # Rysowanie kostki Rubika
+    p.rubiks_display.draw()  # Rysowanie kostki Rubika
 
 def move_viewport_x_with_move(move: str):
     if move == 'X': move_viewport_x(True)
     if move == "X'": move_viewport_x(False)
 
 def move_viewport_x(side: bool):
-    global view_angle_anim_x
-    view_angle_anim_x = Animation(VIEW_CHANGE_DURATION,rotation_angle_x,rotation_angle_x+VIEW_CHANGE_AMOUNT*(-1 if side else 1))
+    global p
+    p.view_angle_anim_x = Animation(VIEW_CHANGE_DURATION,p.rotation_angle_x,p.rotation_angle_x+VIEW_CHANGE_AMOUNT*(-1 if side else 1))
 
 def main():
-    global clock, rotation_angle_x, rotation_angle_y, view_angle_anim_x, view_angle_anim_y, pause_solver, ui, display, rubiks_algorithm, rubiks_data
+    global p
 
     init()
 
     while True:
-        dt = clock.tick(60) / 1000  # czas od poprzedniej klatki w sekundach (max 60 FPS)
+        dt = p.clock.tick(60) / 1000  # czas od poprzedniej klatki w sekundach (max 60 FPS)
 
         # USER INPUT
         usr_quit_action = False
@@ -153,30 +161,33 @@ def main():
                 elif event.key == K_9:  alg_changed = SolvingAlgorithms.Scramble
 
                 if alg_changed is not None:
-                    rubiks_algorithm.select_rubiks_algorythm(alg_changed)
-                    rubiks_algorithm.run_rubiks_solver(rubiks_data.sides)
-                    ui.update_ui_elements(rubiks_algorithm, not pause_solver)
-                    pause_solver = True
+                    p.rubiks_algorithm.select_rubiks_algorythm(alg_changed)
+                    p.rubiks_algorithm.run_rubiks_solver(p.rubiks_data.sides)
+                    p.ui.update_ui_elements(p.rubiks_algorithm, not p.pause_solver)
+                    p.pause_solver = True
 
                 # other
                 if (event.key == K_s):
-                    rubiks_data.scramble_cube()
+                    p.rubiks_data.scramble_cube()
 
                 # data imports
                 if event.key == K_i:
-                    img_col_data = get_imported_img_colour_data()
-                    ui.set_custom_target(img_col_data)
-                    pause_solver = True
-                    ui.select_custom_target_cube(1,1)
+                    if p.rubiks_algorithm.algorythm != SolvingAlgorithms.A_STAR:
+                        p.ui.print_onscreen_error("Custom targets only work in A* Algorithm!")
+                    else:
+                        img_col_data = get_imported_img_colour_data()
+                        p.ui.set_custom_target(img_col_data)
+                        pause_solver = True
+                        p.ui.select_custom_target_cube(0,0)
                 if event.key == K_o:
-                    ui.remove_custom_target()
+                    p.ui.remove_custom_target()
                     pause_solver = True
                 elif event.key == K_c: 
                     img_import_sides = get_cube_by_video()
                     if img_import_sides is not None:
-                        rubiks_data.set_colours(img_import_sides)
+                        p.rubiks_data.set_colours(img_import_sides)
 
-            ui.handle_event(event)
+            p.ui.handle_event(event)
 
         if usr_quit_action: break
         
@@ -189,11 +200,8 @@ def main():
 
         # koniec rysowania
         glPopMatrix()
-        ui.draw()
+        p.ui.draw()
         pygame.display.flip()
-
-        # Rysowanie UI po OpenGL
-        screen_surface = pygame.display.get_surface()
     
     pygame.quit()
 

@@ -82,16 +82,22 @@ class Button(Panel):
                     self.callback()
 
 class Text(UIElement):
-    def __init__(self, x, y, text, font_size=16, color=(255, 255, 255), bg_colour=None):
+    def __init__(self, x, y, text, font_size=16, colour=(255, 255, 255), bg_colour=None):
         super().__init__(x, y, 0, 0)
         self.x = x
         self.y = y
         self.text = text
-        self.color = color
+        self.color = colour
         self.font_size = font_size  # Placeholder, font rendering requires extra setup
         self.bg_color = bg_colour  # New: background color (tuple or None)
+        self.visible = True
+
+    def set_visible(self, val):
+        self.visible = val
 
     def draw(self, display_size=None):
+        if not self.visible: return
+        
         font = pygame.font.Font(pygame.font.get_default_font(), self.font_size)
         text_surface = font.render(self.text, True, self.color, self.bg_color)
         text_surface = text_surface.convert_alpha()

@@ -86,6 +86,8 @@ class RubiksAlgorithm:
                 self.move_sequence = solve_lbl(rubiks_state)
             case SolvingAlgorithms.Kociemba:
                 self.move_sequence = solve_kociemba(rubiks_state)
+            case SolvingAlgorithms.A_STAR:
+                self.move_sequence = solve_kociemba(rubiks_state)
             case SolvingAlgorithms.Test:
                 self.move_sequence = [ "F", "R", 'B', 'L', 'U', 'D' ]
             case SolvingAlgorithms.Scramble:

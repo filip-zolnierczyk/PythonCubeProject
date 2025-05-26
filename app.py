@@ -46,6 +46,11 @@ class Params:
         self.view_angle_anim_x = 0
         self.view_angle_anim_y = 0
         self.pause_solver = False
+        self.custom_cube_select_x = 0
+        self.custom_cube_select_y = 0
+        self.target_size_x = 0
+        self.target_size_y = 0
+        self.cube_size = 3
 p: Params = None
 
 def init():
@@ -144,9 +149,9 @@ def main():
             # button inputs
             if (event.type == KEYDOWN):
                 # change view
-                if event.key == K_LEFT:
+                if event.key == K_n:
                     move_viewport_x(True)
-                if event.key == K_RIGHT:
+                if event.key == K_m:
                     move_viewport_x(False)
 
                 # pause solver
@@ -157,8 +162,9 @@ def main():
                 alg_changed = None
                 if   event.key == K_1:  alg_changed = SolvingAlgorithms.LBL
                 elif event.key == K_2:  alg_changed = SolvingAlgorithms.Kociemba
-                elif event.key == K_8:  alg_changed = SolvingAlgorithms.Test
-                elif event.key == K_9:  alg_changed = SolvingAlgorithms.Scramble
+                elif event.key == K_3:  alg_changed = SolvingAlgorithms.A_STAR
+                elif event.key == K_4:  alg_changed = SolvingAlgorithms.Scramble
+                elif event.key == K_5:  alg_changed = SolvingAlgorithms.Test
 
                 if alg_changed is not None:
                     p.rubiks_algorithm.select_rubiks_algorythm(alg_changed)
@@ -170,15 +176,29 @@ def main():
                 if (event.key == K_s):
                     p.rubiks_data.scramble_cube()
 
+                if p.ui.custom_target and event.key in [K_LEFT, K_RIGHT, K_DOWN, K_UP]:
+                    if event.key == K_LEFT:
+                        p.custom_cube_select_x = p.custom_cube_select_x - 1 if p.custom_cube_select_x > 0 else (p.target_size_x-1)
+                    if event.key == K_RIGHT:
+                        p.custom_cube_select_x = (p.custom_cube_select_x+1)%p.target_size_x
+                    if event.key == K_UP:
+                        p.custom_cube_select_y = p.custom_cube_select_y - 1 if p.custom_cube_select_y > 0 else (p.target_size_y-1)
+                    if event.key == K_DOWN:
+                        p.custom_cube_select_y = (p.custom_cube_select_y+1)%p.target_size_y
+                    
+                    p.ui.select_custom_target_cube(p.custom_cube_select_x, p.custom_cube_select_y)
+
                 # data imports
                 if event.key == K_i:
                     if p.rubiks_algorithm.algorythm != SolvingAlgorithms.A_STAR:
                         p.ui.print_onscreen_error("Custom targets only work in A* Algorithm!")
                     else:
                         img_col_data = get_imported_img_colour_data()
+                        p.target_size_x = len(img_col_data) // p.cube_size
+                        p.target_size_y = len(img_col_data[0]) // p.cube_size
                         p.ui.set_custom_target(img_col_data)
                         pause_solver = True
-                        p.ui.select_custom_target_cube(0,0)
+                        p.ui.select_custom_target_cube(p.custom_cube_select_x, p.custom_cube_select_y)
                 if event.key == K_o:
                     p.ui.remove_custom_target()
                     pause_solver = True

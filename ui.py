@@ -223,9 +223,10 @@ class AppUI:
         self.error_timer = 0
         self.error_text.text = "ERROR " + err
         self.error_text.set_visible(True)
+        self.clock = pygame.time.Clock()
 
     def select_custom_target_cube(self, row, col):
-        self.selected = (row, col)
+        self.selected = (col, row)
         self.highlight_selected()
 
     def handle_event(self, event):

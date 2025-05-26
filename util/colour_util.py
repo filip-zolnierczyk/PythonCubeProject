@@ -9,3 +9,13 @@ COLOR_MAP = {
     'y': (1, 1, 0),   # Żółty
     'x': (0, 0, 0)   # Czarny (kolor domyślny)
 }
+
+# colour map
+preview_colour_map = [
+    (1,1,1), 
+    (1,1,0),
+    (0,1,0),     
+    (0.1,0.1,1),     
+    (1,165/255,0),
+    (1,0,0),     
+]

@@ -1,5 +1,6 @@
 from util.ui_util import *
 from solving_algorithms.rubiks_algorithm import RubiksAlgorithm
+from util.colour_util import preview_colour_map
 
 info_blue = (71/255,116/255,173/255)
 
@@ -155,15 +156,9 @@ class AppUI:
             print("Cannot target empty image!")
             return
         
-        # colour map
-        colour_map = [
-            (1,1,1), 
-            (1,1,0),
-            (0,1,0),     
-            (0,0,1),     
-            (1,165/255,0),
-            (1,0,0),     
-        ]
+        self.preview_colour_data = colour_data
+
+
 
         # cube preview region definitions
         x_start, x_end = self.preview_x_span
@@ -179,8 +174,8 @@ class AppUI:
             for j in range(cols):
                 px = x_start + j*cell_w
                 py = y_start + i*cell_h
-                pnl = create_panel(px, py, cell_w*1.01, cell_h*1.01,
-                                   colour=colour_map[colour_data[i][j]],
+                pnl = create_panel(px, py, cell_w*1.03, cell_h*1.03,
+                                   colour=preview_colour_map[colour_data[i][j]],
                                    border_colour=(0,0,0), border_width=1)
                 self.add_element(pnl, 1)
                 row_panels.append(pnl)
@@ -197,13 +192,12 @@ class AppUI:
         self.target_preview_cubes = []
 
     def highlight_selected(self):
-        pass
-        # for i, row in enumerate(self.target_preview_cubes):
-        #     for j, pnl in enumerate(row):
-        #         if (i//self.cube_size,j//self.cube_size)==self.selected:
-        #             pnl.colour = (1,1,1)
-        #         else:
-        #             pnl.colour = (0.5,0.5,0.5)
+        for i, row in enumerate(self.target_preview_cubes):
+            for j, pnl in enumerate(row):
+                if (i//self.cube_size,j//self.cube_size)==self.selected:
+                    pnl.colour = preview_colour_map[self.preview_colour_data[i][j]]
+                else:
+                    pnl.colour = colour_mult(preview_colour_map[self.preview_colour_data[i][j]], 0.4)
 
     def select_custom_target_cube(self, row, col):
         self.selected = (row, col)
@@ -213,3 +207,7 @@ class AppUI:
         if event.type == pygame.MOUSEBUTTONDOWN:
             for element in self.elements:
                 pass
+
+def colour_mult(col: tuple, mult: float):
+    r,g,b = col
+    return (r*mult,g*mult,b*mult)

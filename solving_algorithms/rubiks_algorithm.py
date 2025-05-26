@@ -18,15 +18,38 @@ class RubiksAlgorithm:
         self.progress = 0
         self.move_sequence: list = []
         self.solving = False
+        
+        self.global_rotation_x = 0
+        self.global_rotation_y = 0
+        self.global_rotation_z = 0
 
     # przykladowa funkcja
-    def get_next_move(self):
+    def get_next_move(self) -> str:
         move = self.move_sequence[self.progress]
         self.progress += 1
         if self.progress == len(self.move_sequence):
             self.solving = False
         #print(f"Performing move: {move}")
+
+        if move[0] == 'X': self.global_rotation_x += 1 if len(move) == 1 else -1
+        if move[0] == 'Y': self.global_rotation_y += 1 if len(move) == 1 else -1
+        if move[0] == 'Z': self.global_rotation_z += 1 if len(move) == 1 else -1
+
         return move
+    
+    def get_next_move_transposed(self) -> str:
+        move = self.get_next_move()
+        
+        if (self.global_rotation_x,self.global_rotation_y,self.global_rotation_z) == (0,0,0):
+            return move
+        
+        if is_reposition_move(move):
+            return move
+        
+        # else transpose move
+        special = move[1] if len(move) == 2 else ""
+        shifted_base_move = shift_move_xyz(move[0],self.global_rotation_x,self.global_rotation_y,self.global_rotation_z)
+        return shifted_base_move+special
 
     def is_solving(self):
         return self.solving
@@ -39,14 +62,21 @@ class RubiksAlgorithm:
         if self.move_sequence == None: return 0
         return len(self.move_sequence)-self.progress-upcoming_move_num_display
 
+    def reset_solver(self):
+        self.move_sequence = []
+        self.progress = 0
+        self.global_rotation_x = 0
+        self.global_rotation_y = 0
+        self.global_rotation_z = 0
+
     def select_rubiks_algorythm(self, alg: SolvingAlgorithms):
         self.algorythm = alg
         self.solving = False
-        self.move_sequence = []
+        self.reset_solver()
 
     def run_rubiks_solver(self, rubiks_state: dict):
         self.solving = True
-        self.progress = 0
+        self.reset_solver()
 
         print(f"Solving with algorythm: {self.algorythm}")
 
@@ -73,3 +103,7 @@ class RubiksAlgorithm:
                 self.move_sequence = scramble
             case _: 
                 return ValueError("Solving for invalid algorythm name: !" + self.algorythm)
+            
+        # make all moves upper
+        for i in range(len(self.move_sequence)):
+            self.move_sequence[i] = self.move_sequence[i].upper()

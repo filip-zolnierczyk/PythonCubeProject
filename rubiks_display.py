@@ -142,7 +142,7 @@ class RubiksCubeDisplay:
 
         # reposition moves special case
         if is_reposition_move(move_str): # just wait and do nothing, reposition move is X,Y or Z
-            self.rotation_animation_objects.append( (self.sides[0][0],Animation(duration, 0, 0, reset_value=0)) )
+            self.rotation_animation_objects.append( (self.sides[0][0],Animation(duration*2.5, 0, 0, reset_value=0)) )
             return
         
         # move info

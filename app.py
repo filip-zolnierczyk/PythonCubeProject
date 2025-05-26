@@ -20,7 +20,13 @@ from video_capture import get_cube_by_video
     white - bottom
 """
 
-MOVE_DURATION = 0.6
+# constants
+MOVE_DURATION = 0.5
+VIEW_CHANGE_DURATION = 1.25
+VIEW_CHANGE_AMOUNT = 90
+
+WINDOW_WIDTH = 1200
+WINDOW_HEIGHT = int(WINDOW_WIDTH * (9/16))
 
 # zmienne globalne
 rotation_angle_x = 0.0
@@ -37,8 +43,6 @@ def init():
     global clock, rubiks_data, rubiks_display, rotation_angle_x, rotation_angle_y, rubiks_algorithm, view_angle_anim_x, view_angle_anim_y, pause_solver, ui, display
 
     # init pygame window
-    WINDOW_WIDTH = 1200
-    WINDOW_HEIGHT = int(WINDOW_WIDTH * (9/16))
     pygame.init()
     display = (WINDOW_WIDTH, WINDOW_HEIGHT)
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
@@ -57,7 +61,7 @@ def init():
     rotation_angle_x = 0
     view_angle_anim_x = None
     view_angle_anim_y = None
-    pause_solver = False
+    pause_solver = True
     display = (WINDOW_WIDTH, WINDOW_HEIGHT)
     ui = ui_file.AppUI(display)
     ui.create_all_ui_elements()
@@ -68,7 +72,7 @@ def init():
     
     # initalize solver 
     rubiks_algorithm = RubiksAlgorithm()
-    rubiks_algorithm.select_rubiks_algorythm(SolvingAlgorithms.Kociemba)
+    rubiks_algorithm.select_rubiks_algorythm(SolvingAlgorithms.Scramble)
     ui.update_ui_elements(rubiks_algorithm, pause_solver)
     rubiks_algorithm.run_rubiks_solver(rubiks_data.sides)
 
@@ -97,14 +101,23 @@ def loop(dt):
         # nowy ruch kostki
         if not pause_solver:
             if rubiks_algorithm.is_solving():
-                move = rubiks_algorithm.get_next_move()
+                move = rubiks_algorithm.get_next_move_transposed()
+                move_viewport_x_with_move(move)
                 rubiks_data.perform_move(move)            
                 rubiks_display.animate_move(move, MOVE_DURATION)
         
         ui.update_ui_elements(rubiks_algorithm, not pause_solver)
 
     rubiks_display.draw()  # Rysowanie kostki Rubika
-        
+
+def move_viewport_x_with_move(move: str):
+    if move == 'X': move_viewport_x(True)
+    if move == "X'": move_viewport_x(False)
+
+def move_viewport_x(side: bool):
+    global view_angle_anim_x
+    view_angle_anim_x = Animation(VIEW_CHANGE_DURATION,rotation_angle_x,rotation_angle_x+VIEW_CHANGE_AMOUNT*(-1 if side else 1))
+
 def main():
     global clock, rotation_angle_x, rotation_angle_y, view_angle_anim_x, view_angle_anim_y, pause_solver, ui, display, rubiks_algorithm, rubiks_data
 
@@ -118,18 +131,14 @@ def main():
         for event in pygame.event.get():
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 usr_quit_action = True
-            
-            # Input do zmian orientacji patrzenia na kostke
-            VIEW_CHANGE_DURATION = 1.25
-            VIEW_CHANGE_AMOUNT = 90
 
             # button inputs
             if (event.type == KEYDOWN):
                 # change view
                 if event.key == K_LEFT:
-                    view_angle_anim_x = Animation(VIEW_CHANGE_DURATION,rotation_angle_x,rotation_angle_x+VIEW_CHANGE_AMOUNT)
+                    move_viewport_x(True)
                 if event.key == K_RIGHT:
-                    view_angle_anim_x = Animation(VIEW_CHANGE_DURATION,rotation_angle_x,rotation_angle_x-VIEW_CHANGE_AMOUNT)
+                    move_viewport_x(False)
 
                 # pause solver
                 if event.key == K_SPACE:

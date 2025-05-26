@@ -14,10 +14,6 @@ class RubiksCube:
         for i in range(len(sides_dict)):
             self.sides[codes[i]] = sides_dict[codes[i]]
 
-        self.global_rotation_x = 0
-        self.global_rotation_y = 0
-        self.global_rotation_z = 0
-
     def set_colours(self, colours: dict):
         self.sides = colours
         self.performed_moves = []
@@ -35,12 +31,12 @@ class RubiksCube:
             for m in scramble_moves:
                 self.perform_move(m)
 
-    def rotate_cube_global(self, base_move: string, clockwise: bool):
-        clockwise_mult = 1 if clockwise else -1
-        match base_move:
-            case 'X': self.global_rotation_x = (self.global_rotation_x + clockwise_mult) % 3
-            case 'Y': self.global_rotation_y += (self.global_rotation_y + clockwise_mult) % 3
-            case 'Z': self.global_rotation_z += (self.global_rotation_z + clockwise_mult) % 3
+    # def rotate_cube_global(self, base_move: string, clockwise: bool):
+    #     clockwise_mult = 1 if clockwise else -1
+    #     match base_move:
+    #         case 'X': self.global_rotation_x = (self.global_rotation_x + clockwise_mult) % 3
+    #         case 'Y': self.global_rotation_y += (self.global_rotation_y + clockwise_mult) % 3
+    #         case 'Z': self.global_rotation_z += (self.global_rotation_z + clockwise_mult) % 3
 
 
     def rotate_face(self, side, clockwise=True):
@@ -81,11 +77,11 @@ class RubiksCube:
         }
 
         if base_move in move_function_map:
-            base_move = shift_move_xyz(base_move, self.global_rotation_x, self.global_rotation_y, self.global_rotation_z)
             for _ in range(repeat):
                 move_function_map[base_move](clockwise)
         elif base_move in ['X','Y','Z']:
-            self.rotate_cube_global(base_move,clockwise)
+            pass
+            #self.rotate_cube_global(base_move,clockwise)
         else:
             raise ValueError(f"Nieznany ruch: {move_str}")
 

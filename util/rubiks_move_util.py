@@ -131,7 +131,7 @@ def shift_move_xyz(base_move, offset_x, offset_y, offset_z):
     moves_order_y = ["L","U","R","D"]
     moves_order_z = ["D","F","U","B"]
 
-    offset_x = -offset_x; offset_y = -offset_y; offset_z = -offset_z
+    #offset_x = -offset_x; offset_y = -offset_y; offset_z = -offset_z
 
     # obroty ruchow po kolei x y z uzywajac podane offsety
     if base_move != "U" and base_move != "D":

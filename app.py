@@ -22,7 +22,7 @@ from imgage_data_import import get_imported_img_colour_data
 """
 
 # constants
-MOVE_DURATION = 0.5
+MOVE_DURATIONS = [1, 0.5, 0.1]
 VIEW_CHANGE_DURATION = 1.25
 VIEW_CHANGE_AMOUNT = 90
 
@@ -51,6 +51,8 @@ class Params:
         self.target_size_x = 0
         self.target_size_y = 0
         self.cube_size = 3
+        self.move_duration_ix = len(MOVE_DURATIONS)//2
+        self.timer_since_move = 0
 p: Params = None
 
 def init():
@@ -88,11 +90,12 @@ def init():
     # initalize solver 
     p.rubiks_algorithm = RubiksAlgorithm()
     p.rubiks_algorithm.select_rubiks_algorythm(SolvingAlgorithms.Scramble)
-    p.ui.update_ui_elements(p.rubiks_algorithm, p.pause_solver)
+    p.ui.update_ui_elements(p.rubiks_algorithm, p.pause_solver, p.move_duration_ix)
     p.rubiks_algorithm.run_rubiks_solver(p.rubiks_data.sides)
 
     # initalize cube display
     p.rubiks_display = RubiksCubeDisplay(3, V3(0,0,0), 0.8, p.rubiks_data.sides)
+
 
 def loop(dt):
     global p
@@ -114,14 +117,16 @@ def loop(dt):
 
         # nowy ruch kostki
         if not p.pause_solver:
-            if p.rubiks_algorithm.is_solving():
+            if p.rubiks_algorithm.is_solving() and p.timer_since_move >= 1.5*MOVE_DURATIONS[p.move_duration_ix]:
                 move = p.rubiks_algorithm.get_next_move_transposed()
-                move_viewport_x_with_move(move)
+                if p.move_duration_ix <= 1: move_viewport_x_with_move(move)
                 p.rubiks_data.perform_move(move)            
-                p.rubiks_display.animate_move(move, MOVE_DURATION)
-        
-        p.ui.update_ui_elements(p.rubiks_algorithm, not p.pause_solver)
+                p.rubiks_display.animate_move(move, MOVE_DURATIONS[p.move_duration_ix])
+                p.timer_since_move = 0
 
+            p.timer_since_move += dt
+        
+    p.ui.update_ui_elements(p.rubiks_algorithm, not p.pause_solver, p.move_duration_ix)
     p.rubiks_display.draw()  # Rysowanie kostki Rubika
 
 def move_viewport_x_with_move(move: str):
@@ -156,7 +161,7 @@ def main():
 
                 # pause solver
                 if event.key == K_SPACE:
-                    pause_solver = not pause_solver
+                    p.pause_solver = not p.pause_solver
                 
                 # select alg
                 alg_changed = None
@@ -169,12 +174,14 @@ def main():
                 if alg_changed is not None:
                     p.rubiks_algorithm.select_rubiks_algorythm(alg_changed)
                     p.rubiks_algorithm.run_rubiks_solver(p.rubiks_data.sides)
-                    p.ui.update_ui_elements(p.rubiks_algorithm, not p.pause_solver)
+                    p.ui.update_ui_elements(p.rubiks_algorithm, not p.pause_solver, p.move_duration_ix)
                     p.pause_solver = True
 
-                # other
+                # custom target
                 if (event.key == K_s):
-                    p.rubiks_data.scramble_cube()
+                    p.stepping_mode = True
+                if event.key == K_p:
+                    p.stepping_mode = False
 
                 if p.ui.custom_target and event.key in [K_LEFT, K_RIGHT, K_DOWN, K_UP]:
                     if event.key == K_LEFT:
@@ -187,6 +194,16 @@ def main():
                         p.custom_cube_select_y = (p.custom_cube_select_y+1)%p.target_size_y
                     
                     p.ui.select_custom_target_cube(p.custom_cube_select_x, p.custom_cube_select_y)
+
+                if p.ui.custom_target and event.key == K_b:
+                    p.ui.remove_custom_target()
+                
+                # speed selections
+                if event.key == K_MINUS or event.key == K_EQUALS:
+                    if event.key == K_EQUALS:
+                        p.move_duration_ix = min(len(MOVE_DURATIONS)-1,p.move_duration_ix+1)
+                    elif event.key == K_MINUS:
+                        p.move_duration_ix = max(0,p.move_duration_ix-1)
 
                 # data imports
                 if event.key == K_i:

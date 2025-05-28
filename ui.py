@@ -10,7 +10,6 @@ class AppUI:
         self.display_size = display_size
         self.elements = []  # Lista przechowująca elementy UI
         self.moves_text = None
-        self.alg_selected_text = None
 
         self.target_preview_cubes = []  # list of lists [row][col]
         self.selected = (0, 0)
@@ -22,6 +21,10 @@ class AppUI:
         self.error_displayed = False
         self.error_timer = 0
         self.error_text = None
+
+        self.alg_selected_imgs = None
+        self.speed_imgs = None
+        self.img_preview_minipanel = None
 
     def add_element(self, element, priority = 0):
         self.elements.append((element,priority))
@@ -46,8 +49,13 @@ class AppUI:
 
         # algorithm select minipanel init
         alg_select_height = 51/101*h*fill_mult
-        alg_select_minipanel = create_img(0,currentHeight,panel_width,alg_select_height,"images/algs_img.png")
-        self.alg_selected_text = create_text(w*0.03, h*0.88, "---", font_size=25, bg_colour=info_blue)
+        self.alg_selected_imgs = {
+            "LBL": create_img(0, currentHeight, panel_width, alg_select_height, "images/select lbl.png"),
+            "Kociemba": create_img(0, currentHeight, panel_width, alg_select_height, "images/select kociemba.png"),
+            "A*": create_img(0, currentHeight, panel_width, alg_select_height, "images/select a star.png"),
+            "Scramble": create_img(0, currentHeight, panel_width, alg_select_height, "images/select scramble.png"),
+            "test": create_img(0, currentHeight, panel_width, alg_select_height, "images/select test.png")
+        }
         currentHeight += alg_select_height
 
         # play pause minipanel init
@@ -63,21 +71,32 @@ class AppUI:
         self.moves_text = create_text(panel_width*0.125,currentHeight-moves_height*0.7,"F      G, F', B ...",font_size=25) #placeholder text
         currentHeight += moves_height
 
+        # speed selection
+        speed_img_h = 17/100*h*fill_mult
+        self.speed_imgs = [
+            create_img(0,currentHeight,panel_width,speed_img_h,"images/speed1.png"),
+            create_img(0,currentHeight,panel_width,speed_img_h,"images/speed2.png"),
+            create_img(0,currentHeight,panel_width,speed_img_h,"images/speed3.png")
+        ]
+
         # left bg panel
         left_info_panel = create_panel(0,0,panel_width,h,colour=info_blue, border_colour=(0,0,0), border_width=w*0.01, )
 
         # add elements
-        self.add_element(alg_select_minipanel)
-        self.add_element(self.alg_selected_text)
+        for img in self.alg_selected_imgs.values():
+            self.add_element(img)
+        for img in self.speed_imgs:
+            self.add_element(img)
         self.add_element(self.play_pause_minipanels[0])
         self.add_element(self.play_pause_minipanels[1])
         self.add_element(moves_minipanel)
         self.add_element(self.moves_text)
         self.add_element(left_info_panel, -1)
 
-    def update_ui_elements(self, rubiks_alg: RubiksAlgorithm, is_playing: bool):
-        if self.alg_selected_text is not None:
-            self.alg_selected_text.text = rubiks_alg.algorythm.value
+    def update_ui_elements(self, rubiks_alg: RubiksAlgorithm, is_playing: bool, speed: float):
+        
+        for key, img in self.alg_selected_imgs.items(): # self.alg_selected_imgs is a dict with key str
+            img.set_visible(key == rubiks_alg.algorythm.value)
 
         if len(self.play_pause_minipanels) == 2:
             self.play_pause_minipanels[0].set_visible(is_playing)
@@ -85,6 +104,12 @@ class AppUI:
 
         moves_arr = rubiks_alg.get_upcoming_moves()
         moves_num = rubiks_alg.get_upcoming_move_num()
+
+        self.speed_imgs[0].set_visible(speed >= 2)
+        self.speed_imgs[1].set_visible(speed == 1)
+        self.speed_imgs[2].set_visible(speed <= 0)
+
+        self.img_preview_minipanel.set_visible(self.custom_target)
 
         if self.moves_text is not None:
             text = ""
@@ -123,19 +148,22 @@ class AppUI:
         self.target_select_minipanels = [target_full_minipanel, target_custom_minipanel]
         currentHeight += target_select_height
 
-        # rubiks image preview minipanel init
-        img_preview_height = 40/118*h*fill_mult
-        img_preview_minipanel  = create_img(panel_start,currentHeight,panel_width,img_preview_height,"images/img9_img.png")
-        self.preview_x_span = (panel_start+panel_width*33/69, panel_start+panel_width*59/69)
-        self.preview_y_span = (currentHeight+img_preview_height*9/39, currentHeight+img_preview_height*35/39)
-        currentHeight += img_preview_height
-
         # camera and image import display minipanel init
         cam_import_height = 25/118*h*fill_mult
         img_import_minipanel = create_img(panel_start,currentHeight,panel_width,cam_import_height,"images/img_import_img.png")
         currentHeight += cam_import_height
         cam_import_minipanel = create_img(panel_start,currentHeight,panel_width,cam_import_height,"images/camera_import_img.png")
         currentHeight += cam_import_height
+        manual_import_minipanel = create_img(panel_start,currentHeight,panel_width,cam_import_height,"images/manual_import.png")
+        currentHeight += cam_import_height
+
+        # rubiks image preview minipanel init
+        img_preview_height = 40/118*h*fill_mult
+        self.img_preview_minipanel  = create_img(panel_start,currentHeight,panel_width,img_preview_height,"images/img9_img.png")
+        self.preview_x_span = (panel_start+panel_width*33/69, panel_start+panel_width*59/69)
+        self.preview_y_span = (currentHeight+img_preview_height*9/39, currentHeight+img_preview_height*35/39)
+        currentHeight += img_preview_height
+
 
         # right bg panel
         right_info_panel = create_panel(panel_start,0,panel_width,h,colour=info_blue, border_colour=(0,0,0), border_width=w*0.01, )
@@ -143,9 +171,10 @@ class AppUI:
         # add elements
         self.add_element(self.target_select_minipanels[0])
         self.add_element(self.target_select_minipanels[1])
-        self.add_element(img_preview_minipanel)
+        self.add_element(self.img_preview_minipanel)
         self.add_element(cam_import_minipanel)
         self.add_element(img_import_minipanel)
+        self.add_element(manual_import_minipanel)
         self.add_element(right_info_panel, -1)
 
     def toggle_custom_target(self, val:bool):

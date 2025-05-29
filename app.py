@@ -10,7 +10,8 @@ from util.vector_util import V3_ZERO
 from util.animation_util import *
 import ui as ui_file
 from video_capture import get_cube_by_video
-from imgage_data_import import get_imported_img_colour_data
+from image_data_import import get_imported_img_colour_data
+from manual_data_import import get_manual_import_data
 
 """ 
     green - front
@@ -22,7 +23,7 @@ from imgage_data_import import get_imported_img_colour_data
 """
 
 # constants
-MOVE_DURATIONS = [1, 0.5, 0.1]
+MOVE_DURATIONS = [0.8, 0.35, 0.075]
 VIEW_CHANGE_DURATION = 1.25
 VIEW_CHANGE_AMOUNT = 90
 
@@ -77,6 +78,7 @@ def init():
     # app data
     p.clock = pygame.time.Clock()
     p.rotation_angle_x = 0
+    p.rotation_angle_y = 0
     p.view_angle_anim_x = None
     p.view_angle_anim_y = None
     p.pause_solver = True
@@ -100,10 +102,15 @@ def init():
 def loop(dt):
     global p
 
-    # animacja zmiany widoku kostki (strzalki <- i -> )
+    # animacja zmiany widoku kostki (horizontal  a<- i ->d )
     if p.view_angle_anim_x is not None and p.view_angle_anim_x.is_animating(dt):
         p.rotation_angle_x = p.view_angle_anim_x.get_animation_value()
     glRotatef(p.rotation_angle_x, 0, 1, 0)
+
+    # animacja zmiany widoku kostki (strzalki w ^ i v s  )
+    if p.view_angle_anim_y is not None and p.view_angle_anim_y.is_animating(dt):
+        p.rotation_angle_y = p.view_angle_anim_y.get_animation_value()
+    glRotatef(p.rotation_angle_y, 1, 0, 0)
 
     # animacja ruchu scianki kostki
     finished_anim = p.rubiks_display.update_animation(dt)
@@ -116,14 +123,18 @@ def loop(dt):
             p.rubiks_display.set_all_colours(p.rubiks_data.sides)
 
         # nowy ruch kostki
-        if not p.pause_solver:
-            if p.rubiks_algorithm.is_solving() and p.timer_since_move >= 1.5*MOVE_DURATIONS[p.move_duration_ix]:
-                move = p.rubiks_algorithm.get_next_move_transposed()
-                if p.move_duration_ix <= 1: move_viewport_x_with_move(move)
-                p.rubiks_data.perform_move(move)            
-                p.rubiks_display.animate_move(move, MOVE_DURATIONS[p.move_duration_ix])
-                p.timer_since_move = 0
+        normal_mode_bool = not p.pause_solver and not p.stepping_mode and p.rubiks_algorithm.is_solving() and p.timer_since_move >= 1.3*MOVE_DURATIONS[p.move_duration_ix]
+        step_mode_bool = p.stepping_mode and p.goto_next_step
 
+        if (normal_mode_bool or step_mode_bool) and not p.rubiks_display.is_animating() and p.rubiks_algorithm.is_solving():
+            move = p.rubiks_algorithm.get_next_move_transposed()
+            if p.move_duration_ix <= 1: move_viewport_x_with_move(move)
+            p.rubiks_data.perform_move(move)            
+            p.rubiks_display.animate_move(move, MOVE_DURATIONS[p.move_duration_ix])
+            p.timer_since_move = 0
+            p.goto_next_step = False
+
+        if not p.pause_solver:
             p.timer_since_move += dt
         
     p.ui.update_ui_elements(p.rubiks_algorithm, not p.pause_solver, p.move_duration_ix)
@@ -136,6 +147,10 @@ def move_viewport_x_with_move(move: str):
 def move_viewport_x(side: bool):
     global p
     p.view_angle_anim_x = Animation(VIEW_CHANGE_DURATION,p.rotation_angle_x,p.rotation_angle_x+VIEW_CHANGE_AMOUNT*(-1 if side else 1))
+
+def move_viewport_y(side: bool):
+    global p
+    p.view_angle_anim_y = Animation(VIEW_CHANGE_DURATION,p.rotation_angle_y,p.rotation_angle_y+VIEW_CHANGE_AMOUNT*(-1 if side else 1))
 
 def main():
     global p
@@ -154,13 +169,23 @@ def main():
             # button inputs
             if (event.type == KEYDOWN):
                 # change view
-                if event.key == K_n:
-                    move_viewport_x(True)
-                if event.key == K_m:
+                if event.key == K_a:
                     move_viewport_x(False)
+                if event.key == K_d:
+                    move_viewport_x(True)
+                if event.key == K_w:
+                    move_viewport_y(True)
+                if event.key == K_s:
+                    move_viewport_y(False)
+
+                if event.key == K_n:
+                    p.goto_next_step = p.stepping_mode
 
                 # pause solver
                 if event.key == K_SPACE:
+                    if p.stepping_mode:
+                        p.stepping_mode = False
+                        p.ui.print_onscreen_message("Stepping mode disabled")
                     p.pause_solver = not p.pause_solver
                 
                 # select alg
@@ -178,10 +203,15 @@ def main():
                     p.pause_solver = True
 
                 # custom target
-                if (event.key == K_s):
+                if (event.key == K_z):
+                    print("Stepping mode active")
+                    p.ui.print_onscreen_message("Stepping Mode Enabled")
                     p.stepping_mode = True
-                if event.key == K_p:
-                    p.stepping_mode = False
+                    p.pause_solver = True
+                if event.key == K_x:
+                    p.ui.print_onscreen_message("Stepping Mode Disabled")
+                    print("Stepping mode disabled")
+                    p.stepping_mode = False 
 
                 if p.ui.custom_target and event.key in [K_LEFT, K_RIGHT, K_DOWN, K_UP]:
                     if event.key == K_LEFT:
@@ -197,6 +227,7 @@ def main():
 
                 if p.ui.custom_target and event.key == K_b:
                     p.ui.remove_custom_target()
+                    p.pause_solver = True
                 
                 # speed selections
                 if event.key == K_MINUS or event.key == K_EQUALS:
@@ -214,15 +245,20 @@ def main():
                         p.target_size_x = len(img_col_data) // p.cube_size
                         p.target_size_y = len(img_col_data[0]) // p.cube_size
                         p.ui.set_custom_target(img_col_data)
-                        pause_solver = True
+                        p.pause_solver = True
                         p.ui.select_custom_target_cube(p.custom_cube_select_x, p.custom_cube_select_y)
-                if event.key == K_o:
-                    p.ui.remove_custom_target()
-                    pause_solver = True
                 elif event.key == K_c: 
                     img_import_sides = get_cube_by_video()
                     if img_import_sides is not None:
                         p.rubiks_data.set_colours(img_import_sides)
+                        p.rubiks_display.set_all_colours(img_import_sides)
+                    p.pause_solver = True
+                elif event.key == K_m:
+                    man_import_sides = get_manual_import_data()
+                    if man_import_sides is not None:
+                        p.rubiks_data.set_colours(man_import_sides)
+                        p.rubiks_display.set_all_colours(man_import_sides)
+                    p.pause_solver = True
 
             p.ui.handle_event(event)
 

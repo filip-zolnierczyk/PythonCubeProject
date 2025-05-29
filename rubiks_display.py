@@ -129,6 +129,8 @@ class RubiksCubeDisplay:
 
         return all_stopped_anim
 
+    def is_animating(self):
+        return len(self.position_animation_objects) + len(self.rotation_animation_objects) > 0
 
     def reset_all_animations(self):
         self.position_animation_objects.clear()

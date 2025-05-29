@@ -17,7 +17,7 @@ CUBE_COLORS = {
     5: {'rgb': (255,0,0),     'name': 'Red',    'emoji': '🟥'},
 }
 
-class RubiksUI(tk.Tk):
+class ImgImportUI(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("Rubik's Image to Cube Pattern")
@@ -150,7 +150,7 @@ class RubiksUI(tk.Tk):
         self.destroy()
 
 def get_imported_img_colour_data():
-    app = RubiksUI()
+    app = ImgImportUI()
     app.mainloop()
 
     if hasattr(app, 'processed_pattern'):

@@ -63,6 +63,9 @@ class RubiksAlgorithm:
         if self.move_sequence == None: return 0
         return len(self.move_sequence)-self.progress-upcoming_move_num_display
 
+    def is_solving(self):
+        return self.progress <= len(self.move_sequence)-1
+
     def reset_solver(self):
         self.move_sequence = []
         self.progress = 0

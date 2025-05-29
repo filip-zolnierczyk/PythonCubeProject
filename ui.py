@@ -17,10 +17,14 @@ class AppUI:
 
         self.cube_size = 3
 
-        self.clock = pygame.time.Clock()
+        self.clock_err = pygame.time.Clock()
+        self.clock_msg = pygame.time.Clock()
         self.error_displayed = False
-        self.error_timer = 0
-        self.error_text = None
+        self.msg_displayed = False
+        self.onscreen_msg_timer_err = 0
+        self.onscreen_msg_timer_msg = 0
+        self.onscreen_text_err = None
+        self.onscreen_text_msg = None
 
         self.alg_selected_imgs = None
         self.speed_imgs = None
@@ -127,11 +131,17 @@ class AppUI:
             self.moves_text.text = text
 
         if self.error_displayed:
-            dt = self.clock.tick(60) / 1000
-            self.error_timer += dt
-            if self.error_timer > ERROR_DISPLAY_TIME:
+            dt = self.clock_err.tick(60) / 1000
+            self.onscreen_msg_timer_err += dt
+            if self.onscreen_msg_timer_err > ERROR_DISPLAY_TIME:
                 self.error_displayed = False
-                self.error_text.set_visible(False)
+                self.onscreen_text_err.set_visible(False)
+        if self.msg_displayed:
+            dt = self.clock_msg.tick(60) / 1000
+            self.onscreen_msg_timer_msg += dt
+            if self.onscreen_msg_timer_msg > ERROR_DISPLAY_TIME:
+                self.msg_displayed = False
+                self.onscreen_text_msg.set_visible(False)
 
     def create_right_info_panel(self):
         # basic data
@@ -240,19 +250,37 @@ class AppUI:
                 else:
                     pnl.colour = colour_mult(preview_colour_map[self.preview_colour_data[i][j]], 0.25)
 
-    def print_onscreen_error(self, err: str):
-        print("ERROR: " + err)
+    def print_onscreen(self, txt, is_error = False):
         w, h = self.display_size
 
-        if self.error_text is None:
-            self.error_text = create_text(w*0.3,h*0.9,err,colour=(255,0,0),font_size=15)
-            self.add_element(self.error_text)
+        if self.onscreen_text_err is None or self.onscreen_text_msg is None:
+            self.onscreen_text_err = create_text(w*0.3,h*0.9,"",colour=(255,0,0),font_size=15)
+            self.onscreen_text_msg = create_text(w*0.3,h*0.1,"",colour=(255,255,255),font_size=15)
+            self.onscreen_text_err.set_visible(False)
+            self.onscreen_text_msg.set_visible(False)
+            self.add_element(self.onscreen_text_err)
+            self.add_element(self.onscreen_text_msg)
 
-        self.error_displayed = True
-        self.error_timer = 0
-        self.error_text.text = "ERROR " + err
-        self.error_text.set_visible(True)
-        self.clock = pygame.time.Clock()
+        if is_error: 
+            print("ERROR: " + txt)
+            self.onscreen_text_err.text = "ERROR " + txt
+            self.onscreen_msg_timer_err = 0
+            self.onscreen_text_err.set_visible(True)
+            self.error_displayed = True
+            self.clock_err = pygame.time.Clock()
+        else:
+            print("Message: " + txt)
+            self.onscreen_msg_timer_msg = 0
+            self.onscreen_text_msg.text = txt
+            self.onscreen_text_msg.set_visible(True)
+            self.msg_displayed = True
+            self.clock_msg = pygame.time.Clock()
+
+    def print_onscreen_error(self, err: str):
+        self.print_onscreen(err, True)
+
+    def print_onscreen_message(self, msg: str):
+        self.print_onscreen(msg, False)
 
     def select_custom_target_cube(self, row, col):
         self.selected = (col, row)

@@ -9,6 +9,8 @@ class RubiksCube:
         self.sides = {"g": "", "r": "", "b": "", "o": "", "y": "", "w": ""}
         self.performed_moves = []
 
+        # testowa zmiana pliku
+
         codes = ['g', 'r', 'b', 'o', 'y', 'w']
 
         for i in range(len(sides_dict)):

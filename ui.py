@@ -210,8 +210,6 @@ class AppUI:
         
         self.preview_colour_data = colour_data
 
-
-
         # cube preview region definitions
         x_start, x_end = self.preview_x_span
         y_start, y_end = self.preview_y_span
@@ -239,7 +237,10 @@ class AppUI:
         
         if len(self.target_preview_cubes) != 0:
             for tpc in self.target_preview_cubes:
-                self.elements.remove(tpc)
+                try:
+                    self.elements.remove(tpc)
+                except ValueError:
+                    pass
         self.target_preview_cubes = []
 
     def highlight_selected(self):

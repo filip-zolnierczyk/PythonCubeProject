@@ -63,7 +63,7 @@ class AppUI:
         currentHeight += alg_select_height
 
         # play pause minipanel init
-        play_pause_height = 25/101*h*fill_mult
+        play_pause_height = 43/101*h*fill_mult
         pause_minipanel = create_img(0,currentHeight,panel_width,play_pause_height,"images/pause_img.png")
         play_minipanel  = create_img(0,currentHeight,panel_width,play_pause_height,"images/playing_img.png")
         self.play_pause_minipanels = [play_minipanel, pause_minipanel]
@@ -72,7 +72,7 @@ class AppUI:
         # moves display minipanel init
         moves_height = 24/101*h*fill_mult
         moves_minipanel = create_img(0,currentHeight,panel_width,moves_height,"images/moves_img.png")
-        self.moves_text = create_text(panel_width*0.125,currentHeight-moves_height*0.7,"F      G, F', B ...",font_size=25) #placeholder text
+        self.moves_text = create_text(panel_width*0.125,currentHeight-moves_height*2.232,"F      G, F', B ...",font_size=25) #placeholder text
         currentHeight += moves_height
 
         # speed selection

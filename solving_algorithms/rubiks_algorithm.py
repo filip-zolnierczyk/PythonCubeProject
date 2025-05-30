@@ -57,7 +57,7 @@ class RubiksAlgorithm:
 
     def get_upcoming_moves(self, move_num=upcoming_move_num_display) -> list:
         if self.move_sequence == None or len(self.move_sequence) == 0: return []
-        return self.move_sequence[max(0,self.progress-1):min(len(self.move_sequence)-1,self.progress+move_num)]
+        return self.move_sequence[max(0,self.progress):min(len(self.move_sequence),self.progress+move_num)]
 
     def get_upcoming_move_num(self) -> int:
         if self.move_sequence == None: return 0

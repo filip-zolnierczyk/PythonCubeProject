@@ -249,10 +249,10 @@ def main():
                         p.ui.select_custom_target_cube(p.custom_cube_select_x, p.custom_cube_select_y)
                 elif event.key == K_c: 
                     p.ui.print_onscreen_message("Getting camera input ... (please wait)")
-                    img_import_sides = get_cube_by_video()
-                    if img_import_sides is not None:
-                        p.rubiks_data.set_colours(img_import_sides)
-                        p.rubiks_display.set_all_colours(img_import_sides)
+                    cam_import_sides = get_cube_by_video()
+                    if cam_import_sides is not None:
+                        p.rubiks_data.set_colours(cam_import_sides)
+                        p.rubiks_display.set_all_colours(cam_import_sides)
                     p.pause_solver = True
                 elif event.key == K_m:
                     man_import_sides = get_manual_import_data()

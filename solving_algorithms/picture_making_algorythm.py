@@ -100,8 +100,6 @@ def make_face(face):
             choose_corner_front(cube, face[i])
             cube.perform_f_move()
 
-        return cube
-
     elif end_face_center == "w":
 
         while current_string != required_strings[0]:
@@ -111,8 +109,6 @@ def make_face(face):
         for i in (0, 6, 8, 2):
             choose_corner_bottom(cube, face[i])
             cube.perform_d_move()
-
-        return cube
 
     elif end_face_center == "y":
 
@@ -124,7 +120,10 @@ def make_face(face):
             choose_corner_top(cube, face[i])
             cube.perform_u_move()
 
-        return cube
+    while cube.facing_user != 'g':
+        cube.rotate_cube()
+
+    return cube
 
 
 def return_moves(face: str):

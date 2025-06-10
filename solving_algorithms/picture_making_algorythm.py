@@ -1,227 +1,140 @@
-import copy
+from rubiks_data import RubiksCube
+import random
+from solving_algorithms.Kociemba_Algorithm import solve_kociemba
 
-from kociemba import solve
-from solving_algorithms.Kociemba_Algorithm import key_convert
-from solving_algorithms.LBL_Algorithm import *
-from kociemba import solve
+random.seed(42)
 
-from solving_algorithms.Kociemba_Algorithm import key_convert
-from solving_algorithms.LBL_Algorithm import *
+
+def create_current_string(cube, end_face_center):
+    current_string = (cube.sides[end_face_center][1] + cube.sides[end_face_center][3] + cube.sides[end_face_center][5] +
+                      cube.sides[end_face_center][7])
+    return current_string
+
+
+def permutate_corner_front(cube):
+    cube.perform_l_move(False)
+    cube.perform_b_move()
+    cube.perform_l_move()
+    cube.perform_b_move(False)
+
+
+def permutate_corner_bottom(cube):
+    cube.perform_l_move(False)
+    cube.perform_u_move(False)
+    cube.perform_l_move()
+    cube.perform_u_move()
+
+
+def permutate_corner_top(cube):
+    cube.perform_l_move(False)
+    cube.perform_d_move(False)
+    cube.perform_l_move()
+    cube.perform_d_move()
+
+
+def choose_corner_front(cube, f):
+    while True:
+        for i in range(6):
+            if cube.sides[cube.facing_user][0] == f:
+                return
+            permutate_corner_front(cube)
+        cube.perform_b_move()
+
+
+def choose_corner_bottom(cube, f):
+    while True:
+        for i in range(6):
+            if cube.sides["w"][0] == f:
+                return
+            permutate_corner_bottom(cube)
+        cube.perform_u_move()
+
+
+def choose_corner_top(cube, f):
+    while True:
+        for i in range(6):
+            if cube.sides["y"][0] == f:
+                return
+            permutate_corner_top(cube)
+        cube.perform_d_move()
 
 
 def make_face(face):
-    #face to string 9 elementowy
-    #na początku tworzymy wybraną ścianke
-    #dopełniamy elementy (nie powtarza sie 2 razy ten sam kolor na elemencie)
-    #dopełniamy reszte kostki (sprawdzamy zgodnosc flipow twistów i permuatcji)
-    def find(color, table):
-        for i in range(len(table)):
-            if color in table[i]:
-                x = table[i]
-                table.remove(table[i])
-                x = list(x)
-                if color == x[1]:
-                    x.remove(color)
-                    return x[::-1]
-                x.remove(color)
-                return x
-
-    def set_side_value(cube, side, index, value):
-        s = cube.sides[side]
-        cube.sides[side] = s[:index] + value + s[index + 1:]
-
-    def fill_face(cube, face):
-
-        x = find(face[0], corners)
-        set_side_value(cube, previous_side(cube.facing_user), 2, x[0])
-        set_side_value(cube, cube.top_side, 6, x[1])
-
-        x = find(face[2], corners)
-        set_side_value(cube, next_side(cube.facing_user), 0, x[1])
-        set_side_value(cube, cube.top_side, 8, x[0])
-
-        x = find(face[6], corners)
-        set_side_value(cube, previous_side(cube.facing_user), 8, x[1])
-        set_side_value(cube, cube.bottom_side, 0, x[0])
-
-        x = find(face[8], corners)
-        set_side_value(cube, next_side(cube.facing_user), 6, x[0])
-        set_side_value(cube, cube.bottom_side, 2, x[1])
-
-        x = find(face[1], edges)
-        set_side_value(cube, cube.top_side, 7, x[0])
-
-        x = find(face[3], edges)
-        set_side_value(cube, previous_side(cube.facing_user), 5, x[0])
-
-        x = find(face[5], edges)
-        set_side_value(cube, next_side(cube.facing_user), 3, x[0])
-
-        x = find(face[7], edges)
-        set_side_value(cube, cube.bottom_side, 1, x[0])
-
-    def side_edges():
-        cube.rotate_cube()
-
-        a = edges[0][0]
-        x = find(a, edges)
-        set_side_value(cube, cube.top_side, 7, x[0])
-        set_side_value(cube, cube.facing_user, 1, a)
-
-        a = edges[0][0]
-        x = find(a, edges)
-        set_side_value(cube, cube.bottom_side, 1, x[0])
-        set_side_value(cube, cube.facing_user, 7, a)
-
-    def valid_cube(cubestring):
-        try:
-            return solve(cubestring)
-        except ValueError as e:
-            return False
-
-    def change_notation(state):
-        face_order = ['y', 'o', 'g', 'w', 'r', 'b']  # ORDER: up right front down left back
-        input_string = ""
-        for face in face_order:
-            input_string += key_convert(state[face])
-        return input_string
-
-    def twist_corner(cube):
-        a = cube.sides[cube.top_side][0]
-        b = cube.sides[previous_side(cube.facing_user)][0]
-        c = cube.sides[opposite_side(cube.facing_user)][2]
-        set_side_value(cube, cube.top_side, 0, c)
-        set_side_value(cube, previous_side(cube.facing_user), 0, a)
-        set_side_value(cube, opposite_side(cube.facing_user), 2, b)
-
-    def flip_edge(cube):
-        a = cube.sides[cube.top_side][5]
-        b = cube.sides[next_side(cube.facing_user)][1]
-        set_side_value(cube, cube.top_side, 5, b)
-        set_side_value(cube, next_side(cube.facing_user), 1, a)
-
-    def change_edge_places(cube):
-        a = cube.sides[cube.top_side][5]
-        b = cube.sides[cube.top_side][3]
-        set_side_value(cube, cube.top_side, 5, b)
-        set_side_value(cube, cube.top_side, 3, a)
-
-        a = cube.sides[previous_side(cube.facing_user)][1]
-        b = cube.sides[next_side(cube.facing_user)][1]
-        set_side_value(cube, previous_side(cube.facing_user), 1, b)
-        set_side_value(cube, next_side(cube.facing_user), 1, a)
-
-    def solved_cube(cube):
-        for i in ['y', 'o', 'g', 'w', 'r', 'b']:
-            string = 9*i
-            if cube.sides[i] != string:
-                return False
-        return True
-
-    def odwroc_algorytm(algorytm):
-        ruchy = algorytm.split()[::-1]  # odwrócenie kolejności
-        odwrotne_ruchy = []
-
-        for ruch in ruchy:
-            if ruch.endswith("2"):
-                odwrotne_ruchy.append(ruch)  # ruchy x2 są takie same po odwróceniu
-            elif ruch.endswith("'"):
-                odwrotne_ruchy.append(ruch[:-1])  # R' → R
-            else:
-                odwrotne_ruchy.append(ruch + "'")  # R → R'
-
-        return " ".join(odwrotne_ruchy)
-
-    edges = [
-        'yg',
-        'yr',
-        'yb',
-        'yo',
-        'gr',
-        'go',
-        'bo',
-        'br',
-        'wg',
-        'wr',
-        'wb',
-        'wo'
-    ]
-
-    corners = [
-        'ygr',
-        'yog',
-        'ybo',
-        'yrb',
-        'wrg',
-        'wgo',
-        'wob',
-        'wbr'
-    ]
-
     cube = RubiksCube()
-    if face[4] != 'y' and face[4] != 'w':
+    end_face_center = face[4]
+    required_strings = [face[1] + face[3] + face[5] + face[7], face[3] + face[7] + face[1] + face[5],
+                        face[7] + face[5] + face[3] + face[1], face[5] + face[1] + face[7] + face[3]]
 
-        while face[4] != cube.facing_user:
+    while True:
+
+        x = random.randint(0, 6)
+
+        if x == 0:
+            cube.perform_u_move()
+        elif x == 1:
+            cube.perform_d_move()
+        elif x == 2:
+            cube.perform_f_move()
+        elif x == 3:
+            cube.perform_b_move()
+        elif x == 5:
+            cube.perform_r_move()
+        elif x == 6:
+            cube.perform_l_move()
+
+        current_string = create_current_string(cube, end_face_center)
+
+        if current_string in required_strings:
+            break
+
+    if end_face_center in ("r", "o", "g", "b"):
+
+        while cube.facing_user != end_face_center:
             cube.rotate_cube()
 
-        cube.sides[cube.facing_user] = face
+        while current_string != required_strings[0]:
+            cube.perform_f_move()
+            current_string = create_current_string(cube, end_face_center)
 
-        fill_face(cube, face)
+        for i in (0, 6, 8, 2):
+            choose_corner_front(cube, face[i])
+            cube.perform_f_move()
 
-        side_edges()
+        return cube
 
-        cube.rotate_cube()
+    elif end_face_center == "w":
 
-        random_face = corners[0][0] + edges[0][0] + corners[1][0] + edges[1][0] + cube.facing_user + edges[2][0] + \
-                      corners[2][0] + edges[3][0] + corners[3][0]
-        cube.sides[cube.facing_user] = random_face
-        fill_face(cube, random_face)
+        while current_string != required_strings[0]:
+            cube.perform_d_move()
+            current_string = create_current_string(cube, end_face_center)
 
-        side_edges()
-        cube.rotate_cube()
+        for i in (0, 6, 8, 2):
+            choose_corner_bottom(cube, face[i])
+            cube.perform_d_move()
 
-        cube.display_cube()
+        return cube
 
-        white_cross(cube)
-        insert_bottom_corners(cube)
-        insert_edges(cube)
-        yellow_cross(cube)
-        allign_top_edges(cube)
-        position_top_corners(cube)
+    elif end_face_center == "y":
 
-        cube.display_cube()
-        cube2 = copy.deepcopy(cube)
+        while current_string != required_strings[0]:
+            cube.perform_u_move()
+            current_string = create_current_string(cube, end_face_center)
 
-        def find_mistakes():
-            for u in range(4):
-                for p in range(4):
-                    for e in range(2):
-                        for c in range(3):
-                            permutate_top_corners(cube)
-                            last_move(cube)
-                            if solved_cube(cube):
-                                p_result = p
-                                e_result = e
-                                c_result = c
-                                print(p_result, e_result, c_result)
-                                return [p_result, e_result, c_result]
-                            twist_corner(cube)
-                        flip_edge(cube)
-                    change_edge_places(cube)
-                cube.perform_u_move()
+        for i in (0, 6, 8, 2):
+            choose_corner_top(cube, face[i])
+            cube.perform_u_move()
 
-        t = find_mistakes()
-        print(t)
-        p_result, e_result, c_result = t[0], t[1], t[2]
+        return cube
 
-        for i in range(p_result):
-            change_edge_places(cube2)
-        for i in range(e_result):
-            flip_edge(cube2)
-        for i in range(c_result):
-            twist_corner(cube2)
 
-        cubestring = change_notation(cube2.sides)
-        solution = solve(cubestring)
-        print(solution)
-        print(odwroc_algorytm(solution))
+def return_moves(face: str):
+    cube = make_face(face)
+    cube.display_cube()
+    moves = solve_kociemba(cube.sides)
+    moves = moves[::-1]
+    for i in range(len(moves)):
+        if len(moves[i]) == 1:
+            moves[i] = moves[i] + "'"
+        elif moves[i][1] != '2':
+            moves[i] = moves[i][0]
+    return moves

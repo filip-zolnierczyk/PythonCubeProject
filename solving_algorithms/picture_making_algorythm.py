@@ -128,7 +128,6 @@ def make_face(face):
 
 def return_moves(face: str):
     cube = make_face(face)
-    cube.display_cube()
     moves = solve_kociemba(cube.sides)
     moves = moves[::-1]
     for i in range(len(moves)):

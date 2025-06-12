@@ -1,6 +1,7 @@
 from rubiks_data import RubiksCube
 import random
 from solving_algorithms.Kociemba_Algorithm import solve_kociemba
+from util.colour_util import colour_num_to_code
 
 random.seed(42)
 
@@ -125,8 +126,13 @@ def make_face(face):
 
     return cube
 
+def convert_to_face_string(face_list: list):
+    face_str = ""
+    for x in face_list:
+        face_str += colour_num_to_code[x]
+    return face_str
 
-def return_moves(face: str):
+def solve_picture(face: str):
     cube = make_face(face)
     moves = solve_kociemba(cube.sides)
     moves = moves[::-1]

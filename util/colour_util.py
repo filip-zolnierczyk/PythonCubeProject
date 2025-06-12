@@ -12,10 +12,14 @@ COLOR_MAP = {
 
 # colour map
 preview_colour_map = [
-    (1,1,1), 
-    (1,1,0),
-    (0,1,0),     
-    (0.25,0.25,1),     
-    (1,165/255,0),
-    (1,0,0),     
+    (1,1,1), # white
+    (1,1,0), # yellow
+    (0,1,0), # green  
+    (0.25,0.25,1),  # blue   
+    (1,165/255,0), # orange
+    (1,0,0), # red
+]
+
+colour_num_to_code = [
+    "w", "y", "g", "b", "o", "r"
 ]

@@ -54,6 +54,7 @@ class Params:
         self.cube_size = 3
         self.move_duration_ix = len(MOVE_DURATIONS)//2
         self.timer_since_move = 0
+        self.image_col_data = [[]]
 p: Params = None
 
 def init():
@@ -152,6 +153,37 @@ def move_viewport_y(side: bool):
     global p
     p.view_angle_anim_y = Animation(VIEW_CHANGE_DURATION,p.rotation_angle_y,p.rotation_angle_y+VIEW_CHANGE_AMOUNT*(-1 if side else 1))
 
+def select_custom_target(target_data: list):
+    global p
+
+    if target_data is None:
+        print("Empty custom target data!")
+        return
+    
+    p.image_col_data = target_data
+    p.target_size_x = len(target_data[0]) // p.cube_size
+    p.target_size_y = len(target_data) // p.cube_size
+    p.custom_cube_select_x = p.custom_cube_select_y = 0
+    p.ui.set_custom_target(p.image_col_data)
+    p.ui.select_custom_target_cube(p.custom_cube_select_x, p.custom_cube_select_y)
+    p.rubiks_algorithm.select_rubiks_algorythm(SolvingAlgorithms.Picture)
+    run_custom_target_solver()
+    p.ui.update_ui_elements(p.rubiks_algorithm, not p.pause_solver, p.move_duration_ix)
+
+def run_custom_target_solver():
+    global p
+
+    target_face = []
+    x_offset = p.custom_cube_select_x * p.cube_size
+    y_offset = p.custom_cube_select_y * p.cube_size
+
+    for x in range(p.cube_size):
+        for y in range(p.cube_size): 
+            target_face.append( p.image_col_data[y_offset+y][x_offset+x])
+
+    p.rubiks_algorithm.run_rubiks_solver(p.rubiks_data.sides, target_face)
+    p.pause_solver = True
+
 def main():
     global p
 
@@ -192,13 +224,18 @@ def main():
                 alg_changed = None
                 if   event.key == K_1:  alg_changed = SolvingAlgorithms.LBL
                 elif event.key == K_2:  alg_changed = SolvingAlgorithms.Kociemba
-                elif event.key == K_3:  alg_changed = SolvingAlgorithms.A_STAR
+                elif event.key == K_3:  
+                    alg_changed = SolvingAlgorithms.Picture
+                    select_custom_target([[2,5,2],[5,2,5],[2,5,2]])
                 elif event.key == K_4:  alg_changed = SolvingAlgorithms.Scramble
                 elif event.key == K_5:  alg_changed = SolvingAlgorithms.Test
 
-                if alg_changed is not None:
+                if alg_changed is not None and alg_changed != p.rubiks_algorithm.algorythm:
+                    if p.rubiks_algorithm.algorythm == SolvingAlgorithms.Picture:
+                        p.ui.remove_custom_target()
                     p.rubiks_algorithm.select_rubiks_algorythm(alg_changed)
-                    p.rubiks_algorithm.run_rubiks_solver(p.rubiks_data.sides)
+                    if alg_changed != SolvingAlgorithms.Picture:
+                        p.rubiks_algorithm.run_rubiks_solver(p.rubiks_data.sides)
                     p.ui.update_ui_elements(p.rubiks_algorithm, not p.pause_solver, p.move_duration_ix)
                     p.pause_solver = True
 
@@ -224,6 +261,7 @@ def main():
                         p.custom_cube_select_y = (p.custom_cube_select_y+1)%p.target_size_y
                     
                     p.ui.select_custom_target_cube(p.custom_cube_select_x, p.custom_cube_select_y)
+                    run_custom_target_solver()
 
                 if p.ui.custom_target and event.key == K_b:
                     p.ui.remove_custom_target()
@@ -238,15 +276,9 @@ def main():
 
                 # data imports
                 if event.key == K_i:
-                    if p.rubiks_algorithm.algorythm != SolvingAlgorithms.A_STAR:
-                        p.ui.print_onscreen_error("Custom targets only work in A* Algorithm!")
-                    else:
-                        img_col_data = get_imported_img_colour_data()
-                        p.target_size_x = len(img_col_data) // p.cube_size
-                        p.target_size_y = len(img_col_data[0]) // p.cube_size
-                        p.ui.set_custom_target(img_col_data)
-                        p.pause_solver = True
-                        p.ui.select_custom_target_cube(p.custom_cube_select_x, p.custom_cube_select_y)
+                    p.rubiks_algorithm.select_rubiks_algorythm(SolvingAlgorithms.Picture)
+                    select_custom_target( get_imported_img_colour_data() )
+
                 elif event.key == K_c: 
                     p.ui.print_onscreen_message("Getting camera input ... (please wait)")
                     cam_import_sides = get_cube_by_video()

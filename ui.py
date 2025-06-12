@@ -30,6 +30,9 @@ class AppUI:
         self.speed_imgs = None
         self.img_preview_minipanel = None
 
+        self.x_cubes = 0
+        self.y_cubes = 0
+
     def add_element(self, element, priority = 0):
         self.elements.append((element,priority))
         self.elements.sort(key = lambda x : x[1], reverse=True)
@@ -56,7 +59,7 @@ class AppUI:
         self.alg_selected_imgs = {
             "LBL": create_img(0, currentHeight, panel_width, alg_select_height, "images/select lbl.png"),
             "Kociemba": create_img(0, currentHeight, panel_width, alg_select_height, "images/select kociemba.png"),
-            "A*": create_img(0, currentHeight, panel_width, alg_select_height, "images/select a star.png"),
+            "Picture": create_img(0, currentHeight, panel_width, alg_select_height, "images/select picture.png"),
             "Scramble": create_img(0, currentHeight, panel_width, alg_select_height, "images/select scramble.png"),
             "test": create_img(0, currentHeight, panel_width, alg_select_height, "images/select test.png")
         }
@@ -208,6 +211,7 @@ class AppUI:
             print("Cannot target empty image!")
             return
         
+        self.target_preview_cubes = []
         self.preview_colour_data = colour_data
 
         # cube preview region definitions
@@ -215,21 +219,21 @@ class AppUI:
         y_start, y_end = self.preview_y_span
 
         # create cube panels grid
-        rows, cols = len(colour_data[0]), len(colour_data) 
+        rows = len(colour_data[0])
+        cols = len(colour_data)
         cell_w = (x_end-x_start) / cols
         cell_h = (y_end-y_start) / rows
         
         for i in range(rows):
-            row_panels = []
+            row_panles = []
             for j in range(cols):
                 px = x_start + j*cell_w
                 py = y_start + i*cell_h
                 pnl = create_panel(px, py, cell_w*1.03, cell_h*1.03,
                                    colour=preview_colour_map[colour_data[i][j]])
                 self.add_element(pnl, 1)
-                row_panels.append(pnl)
-            self.target_preview_cubes.append(row_panels)
-
+                row_panles.append(pnl)
+            self.target_preview_cubes.append(row_panles)
         self.toggle_custom_target(True)
         
     def remove_custom_target(self):
@@ -244,8 +248,12 @@ class AppUI:
         self.target_preview_cubes = []
 
     def highlight_selected(self):
-        for i, row in enumerate(self.target_preview_cubes):
-            for j, pnl in enumerate(row):
+        rows, cols = self.x_cubes * self.cube_size, self.y_cubes * self.cube_size
+
+        for i in range(len(self.target_preview_cubes)):
+            for j in range(len(self.target_preview_cubes[0])):
+                pnl = self.target_preview_cubes[i][j]
+
                 if (i//self.cube_size,j//self.cube_size)==self.selected:
                     pnl.colour = preview_colour_map[self.preview_colour_data[i][j]]
                 else:

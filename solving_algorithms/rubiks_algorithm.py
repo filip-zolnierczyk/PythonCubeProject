@@ -3,6 +3,7 @@ import random
 from solving_algorithms.LBL_Algorithm import *
 from solving_algorithms.Kociemba_Algorithm import *
 from rubiks_data import RubiksCube
+from solving_algorithms.picture_making_algorythm import *
 
 upcoming_move_num_display = 3
 
@@ -11,7 +12,7 @@ class SolvingAlgorithms(Enum):
     LBL = "LBL"
     Test = "test"
     Scramble = "Scramble" 
-    A_STAR = "A*" 
+    Picture = "Picture" 
 
 class RubiksAlgorithm:
     def __init__(self, algorythm: SolvingAlgorithms = SolvingAlgorithms.Test):
@@ -78,7 +79,7 @@ class RubiksAlgorithm:
         self.solving = False
         self.reset_solver()
 
-    def run_rubiks_solver(self, rubiks_state: dict):
+    def run_rubiks_solver(self, rubiks_state: dict, target_face: list = None):
         self.solving = True
         self.reset_solver()
 
@@ -89,8 +90,15 @@ class RubiksAlgorithm:
                 self.move_sequence = solve_lbl(rubiks_state)
             case SolvingAlgorithms.Kociemba:
                 self.move_sequence = solve_kociemba(rubiks_state)
-            case SolvingAlgorithms.A_STAR:
-                self.move_sequence = solve_kociemba(rubiks_state)
+            case SolvingAlgorithms.Picture:
+                if target_face == None:
+                    print("No target face given for picture algorythm!")
+                    return
+                if rubiks_state == {"g":"ggggggggg", "r":"rrrrrrrrr", "b":"bbbbbbbbb", "o":"ooooooooo", "y":"yyyyyyyyy", "w":"wwwwwwwww"}:
+                    self.move_sequence = solve_picture( convert_to_face_string(target_face) )
+                else:
+                    self.move_sequence = solve_kociemba(rubiks_state) + solve_picture( convert_to_face_string(target_face) )
+                    
             case SolvingAlgorithms.Test:
                 self.move_sequence = [ "F", "R", 'B', 'L', 'U', 'D' ]
             case SolvingAlgorithms.Scramble:

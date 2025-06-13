@@ -63,6 +63,13 @@ def is_prime_move(move: str) -> bool:
 def is_reposition_move(move: str) -> bool:
     return len(move) > 0 and move[0] in ["X","Y","Z"]
 
+def invert_move(move: str):
+    if len(move) == 1:
+        move = move + "'"
+    elif move[1] != '2':
+        move = move[0]
+    return move
+
 def opposite_side(x):
     if x == "b":
         return "g"

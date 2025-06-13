@@ -52,6 +52,15 @@ class RubiksAlgorithm:
         special = move[1] if len(move) == 2 else ""
         shifted_base_move = shift_move_xyz(move[0],self.global_rotation_x,self.global_rotation_y,self.global_rotation_z)
         return shifted_base_move+special
+    
+    def get_back_move_transposed(self):
+        if self.progress > 0:
+            self.progress -= 1
+            move = self.get_next_move_transposed()
+            move = invert_move( move )
+            self.progress -= 1
+            return move
+        return None
 
     def is_solving(self):
         return self.solving

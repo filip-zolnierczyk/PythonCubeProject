@@ -213,6 +213,21 @@ def main():
                 if event.key == K_n:
                     p.goto_next_step = p.stepping_mode
 
+                if event.key == K_v:
+                    if not p.stepping_mode:
+                        print("Stepping mode active")
+                        p.ui.print_onscreen_message("Stepping Mode Enabled")
+                        p.stepping_mode = True
+                        p.pause_solver = True 
+                    if not p.rubiks_display.is_animating():
+                        move = p.rubiks_algorithm.get_back_move_transposed()
+                        if move != None:
+                            if p.move_duration_ix <= 1: move_viewport_x_with_move(move)
+                            p.rubiks_data.perform_move(move)            
+                            p.rubiks_display.animate_move(move, MOVE_DURATIONS[p.move_duration_ix]*0.5)
+                            p.timer_since_move = 0
+                            p.goto_next_step = False
+
                 # pause solver
                 if event.key == K_SPACE:
                     if p.stepping_mode:
@@ -230,7 +245,7 @@ def main():
                 elif event.key == K_4:  alg_changed = SolvingAlgorithms.Scramble
                 elif event.key == K_5:  alg_changed = SolvingAlgorithms.Test
 
-                if alg_changed is not None and alg_changed != p.rubiks_algorithm.algorythm:
+                if alg_changed is not None:
                     if p.rubiks_algorithm.algorythm == SolvingAlgorithms.Picture:
                         p.ui.remove_custom_target()
                     p.rubiks_algorithm.select_rubiks_algorythm(alg_changed)

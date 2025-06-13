@@ -177,8 +177,8 @@ def run_custom_target_solver():
     x_offset = p.custom_cube_select_x * p.cube_size
     y_offset = p.custom_cube_select_y * p.cube_size
 
-    for x in range(p.cube_size):
-        for y in range(p.cube_size): 
+    for y in range(p.cube_size): 
+        for x in range(p.cube_size):
             target_face.append( p.image_col_data[y_offset+y][x_offset+x])
 
     p.rubiks_algorithm.run_rubiks_solver(p.rubiks_data.sides, target_face)
